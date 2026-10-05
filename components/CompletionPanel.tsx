@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { PUZZLE_CONFIG } from "@/config/puzzle";
 
 interface CompletionPanelProps {
   relayNumber: number;
@@ -34,7 +35,9 @@ export default function CompletionPanel({
           <br />
           참여하셨습니다!
         </p>
-        <p className="mt-2 text-sm text-slate-500">당신의 한 조각이 새로운 연결을 만들었어요.</p>
+        <p className="mt-2 text-sm text-slate-500">
+          당신의 한 조각이 &lsquo;{PUZZLE_CONFIG.title}&rsquo; 퍼즐에 이어졌어요.
+        </p>
       </div>
 
       {boardJustCompleted && (
