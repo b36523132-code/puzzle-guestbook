@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getColorVariant } from "@/config/colors";
 import { PUZZLE_CONFIG, JOIN_REVEAL_HOLD_MS, MANUAL_REVEAL_GLOW_MS, FLIP_DURATION_MS } from "@/config/puzzle";
 import {
   BOARD_VIEWBOX_HEIGHT,
@@ -209,6 +210,10 @@ export default function PuzzleBoard({
                 <path d={localD} />
               </clipPath>
             ))}
+            {/* 맞춰진(참가자가 있는) 조각 테두리에 은은하게 번지는 빛을 주기 위한 블러 필터 */}
+            <filter id="piece-glow-blur" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="2.2" />
+            </filter>
           </defs>
 
           {cells.map(({ position }) => {
@@ -237,6 +242,25 @@ export default function PuzzleBoard({
               vectorEffect="non-scaling-stroke"
             />
           ))}
+
+          {/* 맞춰진 조각은 테두리를 따라 은은하게 숨쉬듯 빛난다 */}
+          {cells.map(({ position, pathD }) => {
+            const participant = position === pendingHiddenPosition ? undefined : byPosition.get(position);
+            if (!participant) return null;
+            const color = getColorVariant(participant.colorVariant);
+            return (
+              <path
+                key={`glow-${position}`}
+                className="piece-glow"
+                d={pathD}
+                fill="none"
+                stroke={color.fill}
+                strokeWidth={3}
+                filter="url(#piece-glow-blur)"
+                style={{ animationDelay: `${(position % 7) * 0.35}s` }}
+              />
+            );
+          })}
         </svg>
 
         {/* 2) flip 카드 레이어 - 참가자가 있는 칸만, 조각 모양 그대로 뒷면 카드를 얹는다 */}
@@ -292,6 +316,29 @@ export default function PuzzleBoard({
           })}
         </div>
       </div>
+
+      <style jsx>{`
+        .piece-glow {
+          opacity: 0.32;
+          animation: piece-glow-pulse 3.6s ease-in-out infinite;
+          pointer-events: none;
+        }
+        @keyframes piece-glow-pulse {
+          0%,
+          100% {
+            opacity: 0.22;
+          }
+          50% {
+            opacity: 0.6;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .piece-glow {
+            animation: none;
+            opacity: 0.4;
+          }
+        }
+      `}</style>
     </div>
   );
 }
