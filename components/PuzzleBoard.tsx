@@ -16,6 +16,7 @@ import {
 import type { Participant } from "@/types/puzzle";
 import PuzzlePiece from "./PuzzlePiece";
 import EmptyPuzzlePiece from "./EmptyPuzzlePiece";
+import PieceDetailCard from "./PieceDetailCard";
 
 export type RevealMode = "auto" | "manual";
 
@@ -70,6 +71,8 @@ export default function PuzzleBoard({
   // 다른 사람이 새로 참여해서 participants 배열이 바뀌어도, 내가 이미 열어본 조각의 flip 상태는 유지된다.
   const [flipped, setFlipped] = useState<Set<number>>(new Set());
   const [glowing, setGlowing] = useState<Set<number>>(new Set());
+  // 조각을 눌렀을 때 이름/한마디를 줄임 없이 자세히 보여주는 상세 카드가 열려있는 위치
+  const [detailPosition, setDetailPosition] = useState<number | null>(null);
 
   useEffect(() => {
     const wrapperEl = wrapperRef.current;
@@ -168,17 +171,23 @@ export default function PuzzleBoard({
   }, [revealPosition, revealNonce, revealMode]);
 
   /**
-   * 조각 하나를 누르면: 아직 앞면(이미지)이면 뒷면(이름/한마디)으로 뒤집히고, 그 상태가 그대로
-   * 유지된다. 뒷면이 보이는 상태에서 다시 누르면 실제 3D flip 애니메이션과 함께 앞면(이미지)으로
-   * 되돌아간다. 카드 팝업 없이 조각 자체의 뒤집기만으로 끝나는 단순한 토글이다.
+   * 조각 하나를 눌렀을 때:
+   * - 아직 앞면(이미지)이면: 뒷면(이름/한마디)으로 뒤집히면서 동시에 상세 카드를 띄운다.
+   *   카드를 닫아도(X/배경 클릭) 뒷면 상태는 그대로 유지된다 - 카드만 사라진다.
+   * - 이미 뒷면이 보이는 상태라면(카드는 이미 닫혀 있는 상태): 카드 없이 바로 실제 3D flip
+   *   애니메이션과 함께 앞면(이미지)으로 되돌아간다.
    */
-  function toggleFlip(position: number) {
-    setFlipped((prev) => {
-      const next = new Set(prev);
-      if (next.has(position)) next.delete(position);
-      else next.add(position);
-      return next;
-    });
+  function handlePieceClick(position: number) {
+    if (flipped.has(position)) {
+      setFlipped((prev) => {
+        const next = new Set(prev);
+        next.delete(position);
+        return next;
+      });
+    } else {
+      setFlipped((prev) => new Set(prev).add(position));
+      setDetailPosition(position);
+    }
   }
 
   return (
@@ -313,7 +322,7 @@ export default function PuzzleBoard({
                 key={position}
                 type="button"
                 aria-label={`${participant.relayNumber}번째 참가자 ${participant.name}의 조각 보기`}
-                onClick={() => toggleFlip(position)}
+                onClick={() => handlePieceClick(position)}
                 className="h-full w-full cursor-default bg-transparent transition-transform active:scale-[0.96] md:cursor-pointer"
                 style={{ WebkitTapHighlightColor: "transparent" }}
               />
@@ -321,6 +330,14 @@ export default function PuzzleBoard({
           })}
         </div>
       </div>
+
+      {detailPosition != null &&
+        (() => {
+          const detailParticipant = byPosition.get(detailPosition);
+          if (!detailParticipant) return null;
+          // 카드를 닫는 것은 카드만 닫는다 - 조각의 뒷면 상태는 그대로 유지된다.
+          return <PieceDetailCard participant={detailParticipant} onClose={() => setDetailPosition(null)} />;
+        })()}
 
       <style jsx>{`
         .piece-glow {
