@@ -56,9 +56,9 @@ export default function JoinAnimation({ draft, sourceRect, targetRect, durationM
     >
       <PiecePreview
         name={draft.name}
+        message={draft.message}
         colorVariant={draft.colorVariant}
         emojis={draft.emojis}
-        emojiPositions={draft.emojiPositions}
         className="h-full w-full"
       />
     </motion.div>
