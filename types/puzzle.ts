@@ -23,6 +23,8 @@ export interface Board {
 export interface Participant {
   id: string;
   name: string;
+  /** 참가자가 남긴 짧은 한마디 (선택, 최대 35자) */
+  message: string;
   puzzlePosition: number;
   relayNumber: number;
   colorVariant: ColorVariantId;
@@ -46,6 +48,8 @@ export interface JoinPuzzleResult {
 /** 참여 폼에서 현재 사용자가 꾸미고 있는 조각 상태 (아직 등록 전) */
 export interface DraftPiece {
   name: string;
+  /** 선택사항: 다음 사람에게 남기는 짧은 한마디 (최대 35자) */
+  message: string;
   colorVariant: ColorVariantId;
   emojis: string[];
   emojiPositions: EmojiPosition[];
