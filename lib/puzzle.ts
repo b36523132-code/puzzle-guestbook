@@ -153,28 +153,41 @@ export function getPuzzleLayout(
   return cachedLayout;
 }
 
-function emitForward(edge: EdgeCurve): string {
-  return edge.segments.map((s) => `C ${s.c1.x} ${s.c1.y} ${s.c2.x} ${s.c2.y} ${s.p1.x} ${s.p1.y}`).join(" ");
+function emitForward(edge: EdgeCurve, t: (p: Point) => Point = (p) => p): string {
+  return edge.segments
+    .map((s) => {
+      const c1 = t(s.c1);
+      const c2 = t(s.c2);
+      const p1 = t(s.p1);
+      return `C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${p1.x} ${p1.y}`;
+    })
+    .join(" ");
 }
 
-function emitReverse(edge: EdgeCurve): string {
+function emitReverse(edge: EdgeCurve, t: (p: Point) => Point = (p) => p): string {
   const points = [edge.p0, ...edge.segments.map((s) => s.p1)];
   const parts: string[] = [];
   for (let i = edge.segments.length - 1; i >= 0; i--) {
     const seg = edge.segments[i];
-    const target = points[i]; // 역방향으로 갈 때 도착점 = 원래 구간의 시작점
-    parts.push(`C ${seg.c2.x} ${seg.c2.y} ${seg.c1.x} ${seg.c1.y} ${target.x} ${target.y}`);
+    const target = t(points[i]); // 역방향으로 갈 때 도착점 = 원래 구간의 시작점
+    const c2 = t(seg.c2);
+    const c1 = t(seg.c1);
+    parts.push(`C ${c2.x} ${c2.y} ${c1.x} ${c1.y} ${target.x} ${target.y}`);
   }
   return parts.join(" ");
 }
 
-/** (r, c) 조각의 SVG path "d" 문자열을 생성한다. */
-export function getPiecePathD(layout: PuzzleLayout, r: number, c: number): string {
+/**
+ * (r, c) 조각의 SVG path "d" 문자열을 생성하는 공통 로직.
+ * 좌표 변환 함수 `t` 를 바꿔 끼우면 절대 보드 좌표(getPiecePathD)뿐 아니라,
+ * 조각 하나만의 로컬/정규화 좌표(getPieceLocalPathD)도 동일한 경계 데이터로 만들어낼 수 있다.
+ */
+function buildPiecePathD(layout: PuzzleLayout, r: number, c: number, t: (p: Point) => Point): string {
   const { rows, columns, verticalEdges, horizontalEdges } = layout;
-  const TL = corner(r, c);
-  const TR = corner(r, c + 1);
-  const BR = corner(r + 1, c + 1);
-  const BL = corner(r + 1, c);
+  const TL = t(corner(r, c));
+  const TR = t(corner(r, c + 1));
+  const BR = t(corner(r + 1, c + 1));
+  const BL = t(corner(r + 1, c));
 
   let d = `M ${TL.x} ${TL.y} `;
 
@@ -182,33 +195,70 @@ export function getPiecePathD(layout: PuzzleLayout, r: number, c: number): strin
   if (r === 0) {
     d += `L ${TR.x} ${TR.y} `;
   } else {
-    d += emitForward(horizontalEdges[r - 1][c]) + " ";
+    d += emitForward(horizontalEdges[r - 1][c], t) + " ";
   }
 
   // RIGHT
   if (c === columns - 1) {
     d += `L ${BR.x} ${BR.y} `;
   } else {
-    d += emitForward(verticalEdges[r][c]) + " ";
+    d += emitForward(verticalEdges[r][c], t) + " ";
   }
 
   // BOTTOM
   if (r === rows - 1) {
     d += `L ${BL.x} ${BL.y} `;
   } else {
-    d += emitReverse(horizontalEdges[r][c]) + " ";
+    d += emitReverse(horizontalEdges[r][c], t) + " ";
   }
 
   // LEFT
   if (c === 0) {
     d += `L ${TL.x} ${TL.y} `;
   } else {
-    d += emitReverse(verticalEdges[r][c - 1]) + " ";
+    d += emitReverse(verticalEdges[r][c - 1], t) + " ";
   }
 
   d += "Z";
   return d;
 }
+
+/** (r, c) 조각의 SVG path "d" 문자열을 생성한다 (보드 전체 기준 절대 좌표). */
+export function getPiecePathD(layout: PuzzleLayout, r: number, c: number): string {
+  return buildPiecePathD(layout, r, c, (p) => p);
+}
+
+/**
+ * 조각 하나의 돌출부(탭)가 이웃 셀 쪽으로 튀어나올 수 있는 최대 여유분.
+ * CELL 에 대한 비율이며, 베지어 곡선은 자신의 제어점이 만드는 볼록 껍질(convex hull)을
+ * 절대 벗어나지 않으므로 buildLocalTabSegments 의 최대 제어점 y 값(tabSize * 1.1 * 1.28)보다
+ * 넉넉히 크게 잡아두면 어떤 조각이라도 경계가 잘려나가지 않는다.
+ */
+export const PIECE_CLIP_PAD_RATIO = JIGSAW_TAB_SIZE_RATIO * 1.55;
+
+/**
+ * (r, c) 조각 하나만을 위한 "로컬" path "d" 문자열을, 그 조각을 감싸는 패딩 포함 바운딩 박스
+ * 기준 0..1 로 정규화해서 생성한다. CSS `clip-path: url(#...)` 를 objectBoundingBox 단위로 쓸 때
+ * 그대로 사용할 수 있어, 반응형으로 크기가 바뀌는 HTML 카드(퍼즐 조각 뒷면)에도 정확히 들어맞는다.
+ */
+export function getPieceLocalPathD(
+  layout: PuzzleLayout,
+  r: number,
+  c: number,
+  padRatio: number = PIECE_CLIP_PAD_RATIO
+): string {
+  const pad = CELL * padRatio;
+  const span = CELL + pad * 2;
+  const originX = c * CELL - pad;
+  const originY = r * CELL - pad;
+  return buildPiecePathD(layout, r, c, (p) => ({
+    x: (p.x - originX) / span,
+    y: (p.y - originY) / span,
+  }));
+}
+
+/** getPieceLocalPathD 가 가정하는 패딩 포함 박스의, 셀 1칸(CELL) 대비 배율. HTML 오버레이 위치 계산에 사용한다. */
+export const PIECE_BOX_SPAN_RATIO = 1 + 2 * PIECE_CLIP_PAD_RATIO;
 
 /** 0..totalPieces-1 위치 인덱스를 (row, col) 으로 변환 (row-major) */
 export function positionToRowCol(position: number, columns: number = PUZZLE_CONFIG.columns) {
