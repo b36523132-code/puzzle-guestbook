@@ -66,6 +66,8 @@ export default function PuzzleBoard({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
+  // 조각이 뒤집히는 모습을 먼저 보여준 뒤(카드가 그 위를 덮기 전에), 뒷면이 자리를 잡으면 상세 카드를 띄우기 위한 예약 타이머
+  const detailOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // flip 상태는 참가자 데이터(Realtime 으로 계속 바뀜)와 완전히 분리된 "현재 화면" UI 상태다.
   // 다른 사람이 새로 참여해서 participants 배열이 바뀌어도, 내가 이미 열어본 조각의 flip 상태는 유지된다.
@@ -179,23 +181,39 @@ export default function PuzzleBoard({
     });
   }
 
+  function clearDetailOpenTimer() {
+    if (detailOpenTimerRef.current) {
+      clearTimeout(detailOpenTimerRef.current);
+      detailOpenTimerRef.current = null;
+    }
+  }
+
+  useEffect(() => clearDetailOpenTimer, []);
+
   /**
    * 조각 하나를 눌렀을 때:
-   * - 아직 앞면(이미지)이면: 뒷면으로 뒤집으면서 상세 카드를 띄운다.
-   * - 이미 뒷면이 보이는 상태라면: 카드를 다시 띄우지 않고, 그냥 앞면(이미지)으로 되돌아간다.
-   *   (카드를 닫을 때도 동일하게 앞면으로 되돌리므로, 두 경로 모두 실제 3D flip 애니메이션을 탄다.)
+   * - 아직 앞면(이미지)이면: 먼저 뒷면으로 실제로 뒤집히는 모습을 보여주고(FLIP_DURATION_MS),
+   *   뒷면이 자리를 잡은 뒤에야 상세 카드를 띄운다. (카드가 뒤집히는 순간을 가리지 않도록)
+   * - 이미 뒷면이 보이는 상태라면(카드가 뜨기 전이든 후든): 예약된 카드 오픈을 취소하고,
+   *   바로 앞면(이미지)으로 되돌아간다.
+   *   (여는 쪽/닫는 쪽 모두 같은 실제 3D flip 애니메이션을 그대로 탄다.)
    */
   function handlePieceClick(position: number) {
+    clearDetailOpenTimer();
     if (flipped.has(position)) {
       setPieceFlipped(position, false);
       setDetailPosition((prev) => (prev === position ? null : prev));
     } else {
       setPieceFlipped(position, true);
-      setDetailPosition(position);
+      detailOpenTimerRef.current = setTimeout(() => {
+        detailOpenTimerRef.current = null;
+        setDetailPosition(position);
+      }, FLIP_DURATION_MS);
     }
   }
 
   function closeDetailCard() {
+    clearDetailOpenTimer();
     if (detailPosition != null) setPieceFlipped(detailPosition, false);
     setDetailPosition(null);
   }
