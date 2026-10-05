@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DEFAULT_COLOR_VARIANT, type ColorVariantId } from "@/config/colors";
-import { MAX_EMOJIS_PER_PIECE, MAX_NAME_LENGTH } from "@/config/puzzle";
+import { MAX_EMOJIS_PER_PIECE, MAX_MESSAGE_LENGTH, MAX_NAME_LENGTH } from "@/config/puzzle";
 import { assignEmojiPositions } from "@/lib/emoji";
 import type { DraftPiece, SubmitStatus } from "@/types/puzzle";
 import ColorPicker from "./ColorPicker";
@@ -27,6 +27,7 @@ export default function ParticipantForm({
   onDraftEmptyChange,
 }: ParticipantFormProps) {
   const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
   const [colorVariant, setColorVariant] = useState<ColorVariantId>(DEFAULT_COLOR_VARIANT);
   const [emojis, setEmojis] = useState<string[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -35,9 +36,14 @@ export default function ParticipantForm({
   const emojiPositions = assignEmojiPositions(emojis);
 
   useEffect(() => {
-    onDraftEmptyChange(name.trim().length === 0 && emojis.length === 0 && colorVariant === DEFAULT_COLOR_VARIANT);
+    onDraftEmptyChange(
+      name.trim().length === 0 &&
+        message.trim().length === 0 &&
+        emojis.length === 0 &&
+        colorVariant === DEFAULT_COLOR_VARIANT
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, emojis, colorVariant]);
+  }, [name, message, emojis, colorVariant]);
 
   function toggleEmoji(emoji: string) {
     onActivity();
@@ -68,9 +74,15 @@ export default function ParticipantForm({
       setValidationError(`이름은 최대 ${MAX_NAME_LENGTH}자까지 입력할 수 있어요.`);
       return;
     }
+    const trimmedMessage = message.trim();
+    if (trimmedMessage.length > MAX_MESSAGE_LENGTH) {
+      setValidationError(`한마디는 최대 ${MAX_MESSAGE_LENGTH}자까지 입력할 수 있어요.`);
+      return;
+    }
     setValidationError(null);
     const draft: DraftPiece = {
       name: trimmed,
+      message: trimmedMessage,
       colorVariant,
       emojis,
       emojiPositions,
@@ -105,10 +117,31 @@ export default function ParticipantForm({
         </p>
       </div>
 
+      <div>
+        <div className="mb-1.5 flex items-center justify-between">
+          <p className="text-sm font-semibold text-slate-600">한마디 남기기 (선택)</p>
+          <span className="text-xs font-medium text-slate-400">
+            {message.trim().length}/{MAX_MESSAGE_LENGTH}
+          </span>
+        </div>
+        <textarea
+          value={message}
+          onChange={(e) => {
+            onActivity();
+            setMessage(e.target.value.slice(0, MAX_MESSAGE_LENGTH));
+          }}
+          placeholder="다음 사람에게 짧은 메시지를 남겨주세요."
+          maxLength={MAX_MESSAGE_LENGTH}
+          disabled={isSubmitting}
+          rows={2}
+          className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium outline-none focus:border-violet-400 disabled:bg-slate-50"
+        />
+      </div>
+
       <div className="grid flex-1 grid-cols-5 gap-4 overflow-y-auto">
         <div className="col-span-3 space-y-4">
           <div>
-            <p className="mb-2 text-sm font-semibold text-slate-600">조각 색상</p>
+            <p className="mb-2 text-sm font-semibold text-slate-600">조각 뒷면 색상</p>
             <ColorPicker
               value={colorVariant}
               onChange={(c) => {
@@ -121,17 +154,17 @@ export default function ParticipantForm({
         </div>
 
         <div className="col-span-2 flex flex-col items-center justify-start gap-2 pt-1">
-          <p className="text-center text-xs font-semibold text-slate-500">당신의 조각을 꾸며보세요</p>
+          <p className="text-center text-xs font-semibold text-slate-500">내 조각 뒷면 미리보기</p>
           <PiecePreview
             ref={previewRef}
             name={name}
+            message={message}
             colorVariant={colorVariant}
             emojis={emojis}
-            emojiPositions={emojiPositions}
             className="max-w-[160px]"
           />
           <p className="text-center text-[11px] leading-snug text-slate-400">
-            색과 이모지를 골라 나만의 조각을 만들어보세요.
+            조각이 퍼즐에 들어간 뒤 뒤집으면 이 모습이 보여요.
           </p>
         </div>
       </div>
