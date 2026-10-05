@@ -9,7 +9,7 @@ interface ColorPickerProps {
 
 export default function ColorPicker({ value, onChange }: ColorPickerProps) {
   return (
-    <div className="grid grid-cols-5 gap-2.5">
+    <div className="grid grid-cols-5 gap-x-2 gap-y-3">
       {COLOR_PALETTE.map((color) => {
         const selected = color.id === value;
         return (
@@ -19,8 +19,8 @@ export default function ColorPicker({ value, onChange }: ColorPickerProps) {
             aria-label={color.label}
             aria-pressed={selected}
             onClick={() => onChange(color.id)}
-            className={`relative flex h-11 w-11 items-center justify-center rounded-full ring-offset-2 transition-transform duration-150 ease-out active:scale-95 ${
-              selected ? "scale-110 ring-2 ring-slate-900" : "ring-0"
+            className={`relative flex aspect-square w-full max-w-11 items-center justify-center justify-self-center rounded-full ring-offset-2 ring-offset-white transition-colors duration-150 ease-out active:scale-95 ${
+              selected ? "ring-2 ring-slate-900" : "ring-0"
             }`}
             style={{ backgroundColor: color.fill }}
           >
