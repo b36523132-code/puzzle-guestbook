@@ -40,6 +40,7 @@ interface BoardRow {
 export interface ParticipantRow {
   id: string;
   name: string;
+  message: string | null;
   puzzle_position: number;
   relay_number: number;
   color_variant: string;
@@ -68,6 +69,7 @@ function mapParticipant(row: ParticipantRow): Participant {
   return {
     id: row.id,
     name: row.name,
+    message: row.message ?? "",
     puzzlePosition: row.puzzle_position,
     relayNumber: Number(row.relay_number),
     colorVariant: (row.color_variant as ColorVariantId) ?? "purple",
@@ -138,6 +140,7 @@ export async function joinPuzzle(draft: DraftPiece): Promise<JoinPuzzleResult> {
     p_color_variant: draft.colorVariant,
     p_emojis: draft.emojis,
     p_emoji_positions: draft.emojiPositions,
+    p_message: draft.message,
   });
 
   if (error) throw error;
