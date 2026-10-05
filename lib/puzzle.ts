@@ -298,7 +298,8 @@ export const BOARD_VIEWBOX_HEIGHT = PUZZLE_CONFIG.rows * CELL;
 // 독립된 단일 조각 모양 (오른쪽 패널의 "내 조각 미리보기" / 이동 애니메이션용)
 // 실제 보드 위 위치와는 무관하게 늘 같은 아이콘 같은 조각 모양을 사용한다.
 // ---------------------------------------------------------------------------
-const STANDALONE_PAD = CELL * JIGSAW_TAB_SIZE_RATIO * 1.1;
+// 돌출부(탭)가 절대 잘리지 않도록, 보드 위 조각과 동일한 안전 여백 비율을 그대로 사용한다.
+const STANDALONE_PAD = CELL * PIECE_CLIP_PAD_RATIO;
 export const STANDALONE_VIEWBOX = `${-STANDALONE_PAD} ${-STANDALONE_PAD} ${CELL + STANDALONE_PAD * 2} ${
   CELL + STANDALONE_PAD * 2
 }`;
