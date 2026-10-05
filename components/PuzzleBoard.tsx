@@ -16,6 +16,7 @@ import {
 import type { Participant } from "@/types/puzzle";
 import PuzzlePiece from "./PuzzlePiece";
 import EmptyPuzzlePiece from "./EmptyPuzzlePiece";
+import PieceDetailCard from "./PieceDetailCard";
 
 export type RevealMode = "auto" | "manual";
 
@@ -70,6 +71,8 @@ export default function PuzzleBoard({
   // 다른 사람이 새로 참여해서 participants 배열이 바뀌어도, 내가 이미 열어본 조각의 flip 상태는 유지된다.
   const [flipped, setFlipped] = useState<Set<number>>(new Set());
   const [glowing, setGlowing] = useState<Set<number>>(new Set());
+  // 조각을 눌렀을 때 이름/한마디를 줄임 없이 자세히 보여주는 상세 카드가 열려있는 위치
+  const [detailPosition, setDetailPosition] = useState<number | null>(null);
 
   useEffect(() => {
     const wrapperEl = wrapperRef.current;
@@ -210,9 +213,9 @@ export default function PuzzleBoard({
                 <path d={localD} />
               </clipPath>
             ))}
-            {/* 맞춰진(참가자가 있는) 조각 테두리에 은은하게 번지는 빛을 주기 위한 블러 필터 */}
-            <filter id="piece-glow-blur" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="2.2" />
+            {/* 맞춰진(참가자가 있는) 조각 테두리에 번지는 빛을 주기 위한 블러 필터 */}
+            <filter id="piece-glow-blur" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="3.2" />
             </filter>
           </defs>
 
@@ -255,7 +258,7 @@ export default function PuzzleBoard({
                 d={pathD}
                 fill="none"
                 stroke={color.fill}
-                strokeWidth={3}
+                strokeWidth={5.5}
                 filter="url(#piece-glow-blur)"
                 style={{ animationDelay: `${(position % 7) * 0.35}s` }}
               />
@@ -308,7 +311,10 @@ export default function PuzzleBoard({
                 key={position}
                 type="button"
                 aria-label={`${participant.relayNumber}번째 참가자 ${participant.name}의 조각 보기`}
-                onClick={() => toggleFlip(position)}
+                onClick={() => {
+                  toggleFlip(position);
+                  setDetailPosition(position);
+                }}
                 className="h-full w-full cursor-default bg-transparent transition-transform active:scale-[0.96] md:cursor-pointer"
                 style={{ WebkitTapHighlightColor: "transparent" }}
               />
@@ -317,25 +323,32 @@ export default function PuzzleBoard({
         </div>
       </div>
 
+      {detailPosition != null &&
+        (() => {
+          const detailParticipant = byPosition.get(detailPosition);
+          if (!detailParticipant) return null;
+          return <PieceDetailCard participant={detailParticipant} onClose={() => setDetailPosition(null)} />;
+        })()}
+
       <style jsx>{`
         .piece-glow {
-          opacity: 0.32;
-          animation: piece-glow-pulse 3.6s ease-in-out infinite;
+          opacity: 0.55;
+          animation: piece-glow-pulse 3.2s ease-in-out infinite;
           pointer-events: none;
         }
         @keyframes piece-glow-pulse {
           0%,
           100% {
-            opacity: 0.22;
+            opacity: 0.4;
           }
           50% {
-            opacity: 0.6;
+            opacity: 0.95;
           }
         }
         @media (prefers-reduced-motion: reduce) {
           .piece-glow {
             animation: none;
-            opacity: 0.4;
+            opacity: 0.65;
           }
         }
       `}</style>
