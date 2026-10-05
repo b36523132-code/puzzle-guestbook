@@ -170,13 +170,34 @@ export default function PuzzleBoard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealPosition, revealNonce, revealMode]);
 
-  function toggleFlip(position: number) {
+  function setPieceFlipped(position: number, nextFlipped: boolean) {
     setFlipped((prev) => {
       const next = new Set(prev);
-      if (next.has(position)) next.delete(position);
-      else next.add(position);
+      if (nextFlipped) next.add(position);
+      else next.delete(position);
       return next;
     });
+  }
+
+  /**
+   * 조각 하나를 눌렀을 때:
+   * - 아직 앞면(이미지)이면: 뒷면으로 뒤집으면서 상세 카드를 띄운다.
+   * - 이미 뒷면이 보이는 상태라면: 카드를 다시 띄우지 않고, 그냥 앞면(이미지)으로 되돌아간다.
+   *   (카드를 닫을 때도 동일하게 앞면으로 되돌리므로, 두 경로 모두 실제 3D flip 애니메이션을 탄다.)
+   */
+  function handlePieceClick(position: number) {
+    if (flipped.has(position)) {
+      setPieceFlipped(position, false);
+      setDetailPosition((prev) => (prev === position ? null : prev));
+    } else {
+      setPieceFlipped(position, true);
+      setDetailPosition(position);
+    }
+  }
+
+  function closeDetailCard() {
+    if (detailPosition != null) setPieceFlipped(detailPosition, false);
+    setDetailPosition(null);
   }
 
   return (
@@ -311,10 +332,7 @@ export default function PuzzleBoard({
                 key={position}
                 type="button"
                 aria-label={`${participant.relayNumber}번째 참가자 ${participant.name}의 조각 보기`}
-                onClick={() => {
-                  toggleFlip(position);
-                  setDetailPosition(position);
-                }}
+                onClick={() => handlePieceClick(position)}
                 className="h-full w-full cursor-default bg-transparent transition-transform active:scale-[0.96] md:cursor-pointer"
                 style={{ WebkitTapHighlightColor: "transparent" }}
               />
@@ -327,7 +345,7 @@ export default function PuzzleBoard({
         (() => {
           const detailParticipant = byPosition.get(detailPosition);
           if (!detailParticipant) return null;
-          return <PieceDetailCard participant={detailParticipant} onClose={() => setDetailPosition(null)} />;
+          return <PieceDetailCard participant={detailParticipant} onClose={closeDetailCard} />;
         })()}
 
       <style jsx>{`
