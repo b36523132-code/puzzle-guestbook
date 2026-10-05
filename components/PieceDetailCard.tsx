@@ -1,7 +1,16 @@
 "use client";
 
 import { getColorVariant } from "@/config/colors";
-import { getStandalonePiecePathD, STANDALONE_VIEWBOX } from "@/lib/puzzle";
+import { PUZZLE_CONFIG } from "@/config/puzzle";
+import {
+  BOARD_VIEWBOX_HEIGHT,
+  BOARD_VIEWBOX_WIDTH,
+  CELL,
+  PIECE_CLIP_PAD_RATIO,
+  getPiecePathD,
+  getPuzzleLayout,
+  positionToRowCol,
+} from "@/lib/puzzle";
 import type { Participant } from "@/types/puzzle";
 
 interface PieceDetailCardProps {
@@ -13,10 +22,23 @@ interface PieceDetailCardProps {
  * 보드에서 조각을 누르면 뜨는 상세 카드.
  * 퍼즐 조각 자체는 공간이 좁아 한마디(메모)가 줄 수 제한으로 잘려 보일 수 있으므로,
  * 이 카드에서는 줄 제한 없이 전체 내용을 그대로 보여준다.
+ * 조각 미리보기는 단색이 아니라, 실제 보드에서 이 조각이 차지하는 공동 이미지 영역을 그대로
+ * 잘라서 보여준다. 돌출부(탭)가 셀 경계 밖으로 튀어나오므로, 보드와 동일하게 "절대 잘리지 않는"
+ * 여백(PIECE_CLIP_PAD_RATIO)을 둔 viewBox 를 써서 조각 테두리가 잘려 보이지 않게 한다.
  */
 export default function PieceDetailCard({ participant, onClose }: PieceDetailCardProps) {
   const color = getColorVariant(participant.colorVariant);
-  const pathD = getStandalonePiecePathD();
+  const { rows, columns } = PUZZLE_CONFIG;
+  const layout = getPuzzleLayout(rows, columns);
+  const { row, col } = positionToRowCol(participant.puzzlePosition, columns);
+  const pathD = getPiecePathD(layout, row, col);
+  const clipId = `piece-detail-clip-${participant.id}`;
+
+  // 이 조각의 돌출부까지 전부 포함하는, 보드와 같은 절대 좌표계의 정사각 viewBox
+  const pad = CELL * PIECE_CLIP_PAD_RATIO;
+  const span = CELL + pad * 2;
+  const viewMinX = col * CELL - pad;
+  const viewMinY = row * CELL - pad;
 
   return (
     <div
@@ -39,9 +61,27 @@ export default function PieceDetailCard({ participant, onClose }: PieceDetailCar
           ✕
         </button>
 
-        <div className="mx-auto mb-3 h-24 w-24">
-          <svg viewBox={STANDALONE_VIEWBOX} className="h-full w-full drop-shadow-md">
-            <path d={pathD} fill={color.fill} stroke={color.stroke} strokeWidth={2} />
+        <div className="mx-auto mb-3 h-28 w-28">
+          <svg
+            viewBox={`${viewMinX} ${viewMinY} ${span} ${span}`}
+            className="h-full w-full overflow-visible drop-shadow-md"
+          >
+            <defs>
+              <clipPath id={clipId}>
+                <path d={pathD} />
+              </clipPath>
+            </defs>
+            <g clipPath={`url(#${clipId})`}>
+              <image
+                href={PUZZLE_CONFIG.frontImage}
+                x={0}
+                y={0}
+                width={BOARD_VIEWBOX_WIDTH}
+                height={BOARD_VIEWBOX_HEIGHT}
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </g>
+            <path d={pathD} fill="none" stroke={color.fill} strokeWidth={3} />
           </svg>
         </div>
 
