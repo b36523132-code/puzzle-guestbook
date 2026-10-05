@@ -78,7 +78,7 @@ export default function PuzzlePiece({ participant, style, clipPathId, flipped, g
             </span>
             {participant.message && (
               <span
-                className="line-clamp-2 max-w-full text-[clamp(7px,1.15vw,11px)] font-medium leading-tight opacity-90"
+                className="line-clamp-3 max-w-full text-[clamp(7px,1.25vw,11.5px)] font-medium leading-[1.15] opacity-90"
                 style={{ color: color.text }}
               >
                 {participant.message}
