@@ -7,6 +7,15 @@ export const PUZZLE_CONFIG = {
   rows: 6,
   columns: 8,
   totalPieces: 48,
+  /** 퍼즐판 제목. 화면 상단과 완료 메시지 등에서 공통으로 사용한다. */
+  title: "광안리 해수욕장 환경정화",
+  /** 제목 아래에 붙는 짧은 보조 문구 */
+  subtitle: "함께 남긴 조각이 하나의 장면을 완성합니다.",
+  /**
+   * 퍼즐 앞면 전체에 깔리는 공동 이미지 경로 (public/ 기준 절대 경로).
+   * 이 값 하나만 바꾸면 퍼즐판 전체 이미지가 교체된다 - 컴포넌트에 경로를 직접 반복해서 쓰지 말 것.
+   */
+  frontImage: "/images/gwangalli-cleanup.jpg",
 } as const;
 
 export const TOTAL_PIECES = PUZZLE_CONFIG.totalPieces;
@@ -22,6 +31,9 @@ export const JIGSAW_SEED = 20260101;
 
 /** 이름 최대 길이 */
 export const MAX_NAME_LENGTH = 10;
+
+/** 한마디(메모) 최대 길이 */
+export const MAX_MESSAGE_LENGTH = 35;
 
 /** 조각 하나에 붙일 수 있는 이모지 최대 개수 */
 export const MAX_EMOJIS_PER_PIECE = 3;
@@ -43,3 +55,12 @@ export const JOIN_ANIMATION_DURATION_MS = 950;
 
 /** 내 조각 강조 효과 유지 시간 (ms) */
 export const HIGHLIGHT_DURATION_MS = 2000;
+
+/** 신규 참가자의 조각이 퍼즐판에 도착한 뒤, 뒷면(이름/메모)을 잠깐 보여주는 시간 (ms) */
+export const JOIN_REVEAL_HOLD_MS = 1300;
+
+/** 조각 flip(앞면 <-> 뒷면) 3D 애니메이션 길이 (ms) */
+export const FLIP_DURATION_MS = 600;
+
+/** "내 조각 확인하기"를 눌렀을 때 글로우 강조가 유지되는 시간 (ms) */
+export const MANUAL_REVEAL_GLOW_MS = 2400;
