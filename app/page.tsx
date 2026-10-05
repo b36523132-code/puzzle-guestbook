@@ -7,7 +7,7 @@ import JoinAnimation from "@/components/JoinAnimation";
 import OrientationHint from "@/components/OrientationHint";
 import ParticipantForm from "@/components/ParticipantForm";
 import PreviousBoardViewer from "@/components/PreviousBoardViewer";
-import PuzzleBoard from "@/components/PuzzleBoard";
+import PuzzleBoard, { type RevealMode } from "@/components/PuzzleBoard";
 import { IDLE_RESET_TIMEOUT_MS, JOIN_ANIMATION_DURATION_MS, PUZZLE_CONFIG } from "@/config/puzzle";
 import { getCellScreenRect } from "@/lib/puzzle";
 import {
@@ -25,7 +25,7 @@ import type { Board, DraftPiece, JoinPuzzleResult, Participant, SubmitStatus } f
 // 정적 프리렌더 대상에서 제외하고 항상 클라이언트에서 최신 상태로 렌더링한다.
 export const dynamic = "force-dynamic";
 
-type ScreenState = "form" | "flying" | "completed";
+type ScreenState = "form" | "flying" | "revealing" | "completed";
 
 interface FlightState {
   draft: DraftPiece;
@@ -44,7 +44,13 @@ export default function Home() {
   const [lastResult, setLastResult] = useState<JoinPuzzleResult | null>(null);
   const [flight, setFlight] = useState<FlightState | null>(null);
   const [pendingHiddenPosition, setPendingHiddenPosition] = useState<number | null>(null);
-  const [highlightParticipantId, setHighlightParticipantId] = useState<string | null>(null);
+
+  // 퍼즐판에 "이 위치를 뒷면으로 드러내라"고 지시하는 상태. participants 데이터와는
+  // 완전히 분리되어 있어, Realtime 으로 다른 사람의 조각이 들어와도 이 값은 그대로 유지된다.
+  const [revealPosition, setRevealPosition] = useState<number | null>(null);
+  const [revealNonce, setRevealNonce] = useState(0);
+  const [revealMode, setRevealMode] = useState<RevealMode>("auto");
+
   const [celebrating, setCelebrating] = useState(false);
   const [showPrevious, setShowPrevious] = useState(false);
   const [completedBoards, setCompletedBoards] = useState<Board[]>([]);
@@ -205,6 +211,7 @@ export default function Home() {
       const newParticipant: Participant = {
         id: result.participantId,
         name: draft.name,
+        message: draft.message,
         puzzlePosition: result.puzzlePosition,
         relayNumber: result.relayNumber,
         colorVariant: draft.colorVariant,
@@ -226,19 +233,29 @@ export default function Home() {
     }
   }
 
+  // 날아가는 애니메이션이 퍼즐판 위치에 "착지"한 직후: 뒷면(이름/한마디)을 잠깐 보여주고
+  // 짧게 글로우한 뒤 스스로 앞면(공동 이미지)으로 돌아간다. 그 시퀀스가 끝나야 완료 화면을 보여준다.
   function handleFlightComplete() {
+    if (!lastResult) return;
     setFlight(null);
     setPendingHiddenPosition(null);
+    setScreenState("revealing");
+    setRevealMode("auto");
+    setRevealPosition(lastResult.puzzlePosition);
+    setRevealNonce((n) => n + 1);
+  }
+
+  function handleAutoRevealComplete() {
     setSubmitStatus("idle");
     setScreenState("completed");
-    if (lastResult) setHighlightParticipantId(null);
   }
 
   function handleShowMyPiece() {
     if (!lastResult) return;
     markActivity();
-    setHighlightParticipantId(lastResult.participantId);
-    setTimeout(() => setHighlightParticipantId(null), 2000);
+    setRevealMode("manual");
+    setRevealPosition(lastResult.puzzlePosition);
+    setRevealNonce((n) => n + 1);
   }
 
   function handleStartOver() {
@@ -268,8 +285,9 @@ export default function Home() {
       <OrientationHint />
 
       <header className="shrink-0">
-        <h1 className="text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">퍼즐 방명록</h1>
-        <p className="text-xs text-slate-400 sm:text-sm">서로 다른 사람들이 하나의 조각이 되어, 함께 하나의 작품을 완성합니다.</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-violet-500">퍼즐 방명록</p>
+        <h1 className="text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">{PUZZLE_CONFIG.title}</h1>
+        <p className="text-xs text-slate-400 sm:text-sm">{PUZZLE_CONFIG.subtitle}</p>
       </header>
 
       {loadError && (
@@ -294,9 +312,12 @@ export default function Home() {
               participants={participants}
               rows={PUZZLE_CONFIG.rows}
               columns={PUZZLE_CONFIG.columns}
-              highlightParticipantId={highlightParticipantId}
               incomingIds={incomingIds}
               pendingHiddenPosition={pendingHiddenPosition}
+              revealPosition={revealPosition}
+              revealNonce={revealNonce}
+              revealMode={revealMode}
+              onRevealComplete={handleAutoRevealComplete}
             />
             {celebrating && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
@@ -324,10 +345,12 @@ export default function Home() {
             />
           )}
 
-          {screenState === "flying" && (
+          {(screenState === "flying" || screenState === "revealing") && (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-slate-400">
               <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-violet-500" />
-              <p className="text-sm font-medium">조각을 퍼즐판에 잇는 중...</p>
+              <p className="text-sm font-medium">
+                {screenState === "flying" ? "조각을 퍼즐판에 잇는 중..." : "조각이 사진 속으로 스며드는 중..."}
+              </p>
             </div>
           )}
 
