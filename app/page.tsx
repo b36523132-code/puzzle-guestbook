@@ -284,20 +284,12 @@ export default function Home() {
     >
       <OrientationHint />
 
-      <header className="shrink-0">
-        <p className="text-sm font-semibold uppercase tracking-wide text-violet-500">퍼즐 방명록</p>
-        <h1 className="mt-0.5 text-2xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-3xl">
-          {PUZZLE_CONFIG.title}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400 sm:text-base">{PUZZLE_CONFIG.subtitle}</p>
-      </header>
-
       {loadError && (
         <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{loadError}</div>
       )}
 
       <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr]">
-        <section className="flex min-h-0 flex-col rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5 sm:p-7">
+        <section className="flex min-h-0 flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9">
           {screenState === "form" && (
             <ParticipantForm
               key={formKey}
@@ -333,7 +325,7 @@ export default function Home() {
           )}
         </section>
 
-        <section className="flex min-h-0 flex-col gap-3 rounded-3xl bg-gradient-to-br from-violet-600 to-purple-700 p-3 shadow-sm sm:gap-4 sm:p-5">
+        <section className="flex min-h-0 flex-col gap-4 rounded-3xl bg-gradient-to-br from-violet-600 to-purple-700 p-4 shadow-sm sm:gap-5 sm:p-6">
           {activeBoard && (
             <div className="shrink-0 rounded-2xl bg-white px-4 py-3 shadow-sm sm:px-5 sm:py-4">
               <BoardProgress
