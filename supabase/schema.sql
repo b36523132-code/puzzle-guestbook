@@ -87,7 +87,7 @@ create sequence if not exists relay_number_seq start 1;
 -- 3. 참가 등록 RPC : join_puzzle
 --    - 이름/색상/이모지를 받아서
 --      1) 현재 active board 조회 (없으면 생성)
---      2) 비어있는 퍼즐 위치 중 하나를 랜덤으로 선점
+--      2) 비어있는 퍼즐 위치 중 가장 작은 번호(=참가 순서대로)를 선점
 --      3) 전역 relay_number 발급
 --      4) participants 에 저장
 --      5) 보드가 가득 차면 completed 처리 + 다음 board 자동 생성
@@ -187,8 +187,10 @@ begin
       into v_board_id, v_board_number, v_total_pieces;
   end if;
 
-  -- ---- 2) 비어있는 위치 계산 후 랜덤으로 하나 선점 ----
-  select array_agg(pos) into v_empty_positions
+  -- ---- 2) 비어있는 위치 계산 후 "순서대로"(가장 작은 번호부터) 하나 선점 ----
+  -- 예전에는 random() 으로 무작위 위치를 뽑았지만, 이제는 참가 순서대로
+  -- 0번 -> 1번 -> 2번 ... 조각이 차례대로 채워지도록 가장 작은 빈 위치를 선택한다.
+  select array_agg(pos order by pos) into v_empty_positions
   from generate_series(0, v_total_pieces - 1) as pos
   where pos not in (
     select prt.puzzle_position from participants prt where prt.board_id = v_board_id
@@ -207,7 +209,7 @@ begin
     v_empty_positions := array(select generate_series(0, v_total_pieces - 1));
   end if;
 
-  v_chosen_position := v_empty_positions[1 + floor(random() * array_length(v_empty_positions, 1))::int];
+  v_chosen_position := v_empty_positions[1];
 
   -- ---- 3) 전역 참가 순번 발급 (원자적) ----
   v_relay_number := nextval('relay_number_seq');
