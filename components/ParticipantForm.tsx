@@ -195,7 +195,7 @@ export default function ParticipantForm({
             disabled={isSubmitting}
             className="h-14 flex-1 rounded-2xl bg-slate-900 text-lg font-bold text-white transition-transform active:scale-[0.98] disabled:bg-slate-300"
           >
-            {isSubmitting ? "조각을 잋는 중..." : "내 조각 이어가기"}
+            {isSubmitting ? "조각을 잇는 중..." : "내 조각 이어가기"}
           </button>
         )}
       </div>
