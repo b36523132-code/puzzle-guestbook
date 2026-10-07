@@ -229,20 +229,20 @@ export default function PuzzleBoard({
               <feGaussianBlur stdDeviation="3.2" />
             </filter>
 
-            {/* 채워진 조각: 볼록하게 솟아오른 느낌을 주는 하이라이트/그림자 베벨 + 미세한 들림 그림자 */}
-            <filter id="piece-emboss" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="1.8" result="alphaBlur" />
-              <feOffset in="alphaBlur" dx="-1.3" dy="-1.3" result="hiOff" />
-              <feFlood floodColor="#ffffff" floodOpacity="0.85" result="hiColor" />
+            {/* 채워진 조각: 사진이 또렷이 보이는 선에서 살짝 볼록한 느낌만 더하는 가벼운 베벨 */}
+            <filter id="piece-emboss" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="alphaBlur" />
+              <feOffset in="alphaBlur" dx="-1" dy="-1" result="hiOff" />
+              <feFlood floodColor="#ffffff" floodOpacity="0.55" result="hiColor" />
               <feComposite in="hiColor" in2="hiOff" operator="in" result="hiRaw" />
               <feComposite in="hiRaw" in2="SourceAlpha" operator="in" result="highlight" />
-              <feOffset in="alphaBlur" dx="1.3" dy="1.3" result="shOff" />
-              <feFlood floodColor="#000000" floodOpacity="0.45" result="shColor" />
+              <feOffset in="alphaBlur" dx="1" dy="1" result="shOff" />
+              <feFlood floodColor="#000000" floodOpacity="0.32" result="shColor" />
               <feComposite in="shColor" in2="shOff" operator="in" result="shRaw" />
               <feComposite in="shRaw" in2="SourceAlpha" operator="in" result="shadow" />
               <feBlend in="SourceGraphic" in2="shadow" mode="multiply" result="withShadow" />
               <feBlend in="withShadow" in2="highlight" mode="screen" result="beveled" />
-              <feDropShadow in="beveled" dx="0.8" dy="1.6" stdDeviation="1.4" floodOpacity="0.28" />
+              <feDropShadow in="beveled" dx="0.6" dy="1.2" stdDeviation="1.1" floodOpacity="0.24" />
             </filter>
 
             {/* 빈 조각: 안으로 들어간 느낌(이너 쉐도우) + 종이처럼 보이도록 채도를 낮춘다 */}
