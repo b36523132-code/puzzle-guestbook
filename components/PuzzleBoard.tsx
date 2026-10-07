@@ -228,34 +228,79 @@ export default function PuzzleBoard({
             <filter id="piece-glow-blur" x="-80%" y="-80%" width="260%" height="260%">
               <feGaussianBlur stdDeviation="3.2" />
             </filter>
+
+            {/* 채워진 조각: 볼록하게 솟아오른 느낌을 주는 하이라이트/그림자 베벨 + 미세한 들림 그림자 */}
+            <filter id="piece-emboss" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="1.8" result="alphaBlur" />
+              <feOffset in="alphaBlur" dx="-1.3" dy="-1.3" result="hiOff" />
+              <feFlood floodColor="#ffffff" floodOpacity="0.85" result="hiColor" />
+              <feComposite in="hiColor" in2="hiOff" operator="in" result="hiRaw" />
+              <feComposite in="hiRaw" in2="SourceAlpha" operator="in" result="highlight" />
+              <feOffset in="alphaBlur" dx="1.3" dy="1.3" result="shOff" />
+              <feFlood floodColor="#000000" floodOpacity="0.45" result="shColor" />
+              <feComposite in="shColor" in2="shOff" operator="in" result="shRaw" />
+              <feComposite in="shRaw" in2="SourceAlpha" operator="in" result="shadow" />
+              <feBlend in="SourceGraphic" in2="shadow" mode="multiply" result="withShadow" />
+              <feBlend in="withShadow" in2="highlight" mode="screen" result="beveled" />
+              <feDropShadow in="beveled" dx="0.8" dy="1.6" stdDeviation="1.4" floodOpacity="0.28" />
+            </filter>
+
+            {/* 빈 조각: 안으로 들어간 느낌(이너 쉐도우) + 종이처럼 보이도록 채도를 낮춘다 */}
+            <filter id="piece-inset" x="-20%" y="-20%" width="140%" height="140%">
+              <feColorMatrix in="SourceGraphic" type="saturate" values="0.2" result="desat" />
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="alphaBlur" />
+              <feOffset in="alphaBlur" dx="-1.4" dy="-1.4" result="shOff" />
+              <feFlood floodColor="#000000" floodOpacity="0.55" result="shColor" />
+              <feComposite in="shColor" in2="shOff" operator="in" result="shRaw" />
+              <feComposite in="shRaw" in2="SourceAlpha" operator="in" result="innerShadow" />
+              <feOffset in="alphaBlur" dx="1.4" dy="1.4" result="hiOff" />
+              <feFlood floodColor="#ffffff" floodOpacity="0.4" result="hiColor" />
+              <feComposite in="hiColor" in2="hiOff" operator="in" result="hiRaw" />
+              <feComposite in="hiRaw" in2="SourceAlpha" operator="in" result="innerHighlight" />
+              <feBlend in="desat" in2="innerShadow" mode="multiply" result="step1" />
+              <feBlend in="step1" in2="innerHighlight" mode="screen" />
+            </filter>
           </defs>
 
           {cells.map(({ position }) => {
             const participant = position === pendingHiddenPosition ? undefined : byPosition.get(position);
             const isIncoming = participant ? incomingIds?.has(participant.id) : false;
             return (
-              <g
-                key={`img-${position}`}
-                clipPath={`url(#piece-abs-${position})`}
-                opacity={participant ? 1 : 0.88}
-                style={{ transition: isIncoming ? "opacity 0.6s ease" : undefined }}
-              >
-                <use href="#board-photo" />
-                {!participant && <rect x={0} y={0} width={BOARD_VIEWBOX_WIDTH} height={BOARD_VIEWBOX_HEIGHT} fill="#ffffff" fillOpacity={0.08} />}
+              <g key={`img-${position}`} filter={participant ? "url(#piece-emboss)" : "url(#piece-inset)"}>
+                <g
+                  clipPath={`url(#piece-abs-${position})`}
+                  opacity={participant ? 1 : 0.3}
+                  style={{ transition: isIncoming ? "opacity 0.6s ease" : undefined }}
+                >
+                  <use href="#board-photo" />
+                  {!participant && (
+                    <rect
+                      x={0}
+                      y={0}
+                      width={BOARD_VIEWBOX_WIDTH}
+                      height={BOARD_VIEWBOX_HEIGHT}
+                      fill="#d8d3c6"
+                      fillOpacity={0.55}
+                    />
+                  )}
+                </g>
               </g>
             );
           })}
 
-          {cells.map(({ position, pathD }) => (
-            <path
-              key={`stroke-${position}`}
-              d={pathD}
-              fill="none"
-              stroke="rgba(255,255,255,0.55)"
-              strokeWidth={1.1}
-              vectorEffect="non-scaling-stroke"
-            />
-          ))}
+          {cells.map(({ position, pathD }) => {
+            const participant = position === pendingHiddenPosition ? undefined : byPosition.get(position);
+            return (
+              <path
+                key={`stroke-${position}`}
+                d={pathD}
+                fill="none"
+                stroke={participant ? "rgba(255,255,255,0.6)" : "rgba(120,110,92,0.4)"}
+                strokeWidth={participant ? 1 : 1.3}
+                vectorEffect="non-scaling-stroke"
+              />
+            );
+          })}
 
           {/* 맞춰진 조각은 테두리를 따라 은은하게 숨쉬듯 빛난다 */}
           {cells.map(({ position, pathD }) => {
