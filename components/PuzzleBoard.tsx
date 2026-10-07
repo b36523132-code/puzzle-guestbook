@@ -194,7 +194,7 @@ export default function PuzzleBoard({
     <div ref={wrapperRef} className="flex h-full w-full items-center justify-center">
       <div
         ref={setBoardRef}
-        className="relative select-none"
+        className="relative select-none overflow-hidden rounded-2xl shadow-sm"
         style={{ width: size.width || "100%", height: size.height || "100%" }}
         aria-label={`${PUZZLE_CONFIG.title} 퍼즐판`}
       >
@@ -264,7 +264,7 @@ export default function PuzzleBoard({
               <g key={`img-${position}`} filter={participant ? "url(#piece-emboss)" : "url(#piece-inset)"}>
                 <g
                   clipPath={`url(#piece-abs-${position})`}
-                  opacity={participant ? 1 : 0.3}
+                  opacity={participant ? 1 : 0.5}
                   style={{ transition: isIncoming ? "opacity 0.6s ease" : undefined }}
                 >
                   <use href="#board-photo" />
@@ -275,7 +275,7 @@ export default function PuzzleBoard({
                       width={BOARD_VIEWBOX_WIDTH}
                       height={BOARD_VIEWBOX_HEIGHT}
                       fill="#d8d3c6"
-                      fillOpacity={0.55}
+                      fillOpacity={0.4}
                     />
                   )}
                 </g>
