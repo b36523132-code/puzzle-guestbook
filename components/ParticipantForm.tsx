@@ -226,14 +226,14 @@ const INTRO_STEPS = [
 
 function IntroScreen({ onStart }: { onStart: () => void }) {
   return (
-    <div className="flex h-full flex-col justify-center gap-6">
+    <div className="flex h-full flex-col justify-center gap-7">
       <div className="flex flex-col items-start gap-3">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-2xl">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-2xl">
           🧩
         </span>
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-violet-500">광안리 해수욕장 환경정화 참여</p>
-          <h2 className="mt-1 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">
+          <h2 className="mt-2 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
             환경정화 릴레이에
             <br />
             오신 걸 환영해요!
@@ -241,22 +241,26 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         </div>
       </div>
 
-      <div className="space-y-1">
-        <p className="text-base font-bold text-violet-600">당신의 조각을 완성해 릴레이를 이어주세요.</p>
-        <p className="text-sm text-slate-500">
-          이름과 짧은 메모를 남기고, 단계에 따라 나만의 조각을 완성하면 됩니다.
-        </p>
-      </div>
+      <p className="text-lg font-bold leading-relaxed text-violet-600 sm:text-xl sm:leading-relaxed">
+        이름과 메모를 남기고
+        <br />
+        나만의 조각을 완성해보세요.
+      </p>
 
-      <div className="flex flex-col gap-2">
-        {INTRO_STEPS.map(({ no, title, desc }) => (
-          <div key={no} className="flex items-center gap-3 rounded-2xl bg-violet-50 px-3 py-2.5 ring-1 ring-violet-100">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-xs font-extrabold text-white">
+      <div className="flex flex-col">
+        {INTRO_STEPS.map(({ no, title, desc }, i) => (
+          <div
+            key={no}
+            className={`flex items-center gap-3 py-3 ${
+              i !== INTRO_STEPS.length - 1 ? "border-b border-slate-100" : ""
+            }`}
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-600 text-xs font-extrabold text-white">
               {no}
             </span>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-900">{title}</p>
-              <p className="text-xs text-slate-500">{desc}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-bold text-slate-900">{title}</p>
+              <p className="text-sm text-slate-400">{desc}</p>
             </div>
           </div>
         ))}
