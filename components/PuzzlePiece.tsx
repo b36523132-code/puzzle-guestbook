@@ -57,10 +57,15 @@ export default function PuzzlePiece({ participant, style, clipPathId, flipped, g
             transform: "rotateY(180deg)",
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
+            /* backfaceVisibility 만으로는 clip-path + 3D transform 조합에서 일부 브라우저가
+               뒷면을 완전히 숨기지 못하는 경우가 있어, opacity 로 한 번 더 확실히 숨긴다.
+               (visibility 는 transform 전환과 함께 자연스럽게 사라지는 flip 애니메이션을
+               끊어버리므로 사용하지 않는다.) */
+            opacity: flipped ? 1 : 0,
             boxShadow: glowing
               ? `0 0 0 3px rgba(255,255,255,0.9) inset, 0 0 22px 6px ${color.fill}`
               : "0 0 0 0 transparent",
-            transition: "box-shadow 0.4s ease",
+            transition: "box-shadow 0.4s ease, opacity 0.6s ease",
           }}
         >
           <div
@@ -95,3 +100,4 @@ export default function PuzzlePiece({ participant, style, clipPathId, flipped, g
     </div>
   );
 }
+
