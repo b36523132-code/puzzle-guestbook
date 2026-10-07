@@ -229,20 +229,15 @@ export default function PuzzleBoard({
               <feGaussianBlur stdDeviation="3.2" />
             </filter>
 
-            {/* 채워진 조각: 사진이 또렷이 보이는 선에서 살짝 볼록한 느낌만 더하는 가벼운 베벨 */}
-            <filter id="piece-emboss" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="alphaBlur" />
-              <feOffset in="alphaBlur" dx="-1" dy="-1" result="hiOff" />
-              <feFlood floodColor="#ffffff" floodOpacity="0.55" result="hiColor" />
-              <feComposite in="hiColor" in2="hiOff" operator="in" result="hiRaw" />
-              <feComposite in="hiRaw" in2="SourceAlpha" operator="in" result="highlight" />
-              <feOffset in="alphaBlur" dx="1" dy="1" result="shOff" />
-              <feFlood floodColor="#000000" floodOpacity="0.32" result="shColor" />
-              <feComposite in="shColor" in2="shOff" operator="in" result="shRaw" />
-              <feComposite in="shRaw" in2="SourceAlpha" operator="in" result="shadow" />
-              <feBlend in="SourceGraphic" in2="shadow" mode="multiply" result="withShadow" />
-              <feBlend in="withShadow" in2="highlight" mode="screen" result="beveled" />
-              <feDropShadow in="beveled" dx="0.6" dy="1.2" stdDeviation="1.1" floodOpacity="0.24" />
+            {/*
+              채워진 조각: 사진 색이 또렷하게 보여야 한다.
+              (예전 버전은 feGaussianBlur(SourceAlpha) 결과가 조각 내부까지 거의 불투명하게
+              남는 특성 때문에, 하이라이트/쉐도우 feComposite 가 테두리만이 아니라 조각 전체를
+              흰색/검은색으로 덮어버려 사진이 하얗게 떠 보이는 버그가 있었다. 사진 색은 전혀
+              건드리지 않고 뒤쪽에 그림자만 드리워 볼록한 느낌을 주는 feDropShadow 하나로 단순화한다.)
+            */}
+            <filter id="piece-emboss" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0.6" dy="1.2" stdDeviation="1" floodColor="#000000" floodOpacity="0.28" />
             </filter>
 
             {/* 빈 조각: 안으로 들어간 느낌(이너 쉐도우) + 종이처럼 보이도록 채도를 낮춘다 */}
