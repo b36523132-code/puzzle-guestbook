@@ -227,18 +227,15 @@ const INTRO_STEPS = [
 function IntroScreen({ onStart }: { onStart: () => void }) {
   return (
     <div className="flex h-full flex-col justify-center gap-7">
-      <div className="flex flex-col items-start gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-2xl">
-          🧩
-        </span>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-violet-500">광안리 해수욕장 환경정화 참여</p>
-          <h2 className="mt-2 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
-            환경정화 릴레이에
-            <br />
-            오신 걸 환영해요!
-          </h2>
-        </div>
+      <div>
+        <p className="text-lg font-bold text-violet-500 sm:text-xl">퍼즐 방명록</p>
+        <h2 className="mt-2 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
+          광안리 환경정화,
+          <br />
+          이제 당신의 조각을
+          <br />
+          이어볼 차례예요!
+        </h2>
       </div>
 
       <p className="text-lg font-bold leading-relaxed text-violet-600 sm:text-xl sm:leading-relaxed">
