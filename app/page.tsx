@@ -285,51 +285,18 @@ export default function Home() {
       <OrientationHint />
 
       <header className="shrink-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-violet-500">퍼즐 방명록</p>
-        <h1 className="text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">{PUZZLE_CONFIG.title}</h1>
-        <p className="text-xs text-slate-400 sm:text-sm">{PUZZLE_CONFIG.subtitle}</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-violet-500">퍼즐 방명록</p>
+        <h1 className="mt-0.5 text-2xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-3xl">
+          {PUZZLE_CONFIG.title}
+        </h1>
+        <p className="mt-1 text-sm text-slate-400 sm:text-base">{PUZZLE_CONFIG.subtitle}</p>
       </header>
 
       {loadError && (
         <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{loadError}</div>
       )}
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px]">
-        <section className="flex min-h-0 flex-col gap-3 rounded-3xl bg-white/70 p-3 shadow-sm ring-1 ring-slate-900/5 sm:p-5">
-          {activeBoard && (
-            <BoardProgress
-              boardNumber={activeBoard.boardNumber}
-              filledCount={participants.length}
-              totalPieces={activeBoard.totalPieces}
-              onShowPrevious={handleOpenPrevious}
-              hasPreviousBoards={activeBoard.boardNumber > 1}
-            />
-          )}
-
-          <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-            <PuzzleBoard
-              containerRef={boardContainerRef}
-              participants={participants}
-              rows={PUZZLE_CONFIG.rows}
-              columns={PUZZLE_CONFIG.columns}
-              incomingIds={incomingIds}
-              pendingHiddenPosition={pendingHiddenPosition}
-              revealPosition={revealPosition}
-              revealNonce={revealNonce}
-              revealMode={revealMode}
-              onRevealComplete={handleAutoRevealComplete}
-            />
-            {celebrating && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
-                <div className="animate-pulse rounded-2xl bg-white/80 px-6 py-4 text-center shadow-lg">
-                  <p className="text-lg font-extrabold text-slate-900">48개의 조각이 하나로 이어졌어요.</p>
-                  <p className="text-sm text-slate-500">함께 하나의 퍼즐을 완성했습니다.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
+      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr]">
         <section className="flex min-h-0 flex-col rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-900/5 sm:p-6">
           {screenState === "form" && (
             <ParticipantForm
@@ -364,6 +331,41 @@ export default function Home() {
               onStartOver={handleStartOver}
             />
           )}
+        </section>
+
+        <section className="flex min-h-0 flex-col gap-3 rounded-3xl bg-white/70 p-3 shadow-sm ring-1 ring-slate-900/5 sm:p-5">
+          {activeBoard && (
+            <BoardProgress
+              boardNumber={activeBoard.boardNumber}
+              filledCount={participants.length}
+              totalPieces={activeBoard.totalPieces}
+              onShowPrevious={handleOpenPrevious}
+              hasPreviousBoards={activeBoard.boardNumber > 1}
+            />
+          )}
+
+          <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+            <PuzzleBoard
+              containerRef={boardContainerRef}
+              participants={participants}
+              rows={PUZZLE_CONFIG.rows}
+              columns={PUZZLE_CONFIG.columns}
+              incomingIds={incomingIds}
+              pendingHiddenPosition={pendingHiddenPosition}
+              revealPosition={revealPosition}
+              revealNonce={revealNonce}
+              revealMode={revealMode}
+              onRevealComplete={handleAutoRevealComplete}
+            />
+            {celebrating && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
+                <div className="animate-pulse rounded-2xl bg-white/80 px-6 py-4 text-center shadow-lg">
+                  <p className="text-xl font-extrabold text-slate-900">48개의 조각이 하나로 이어졌어요.</p>
+                  <p className="text-base text-slate-500">함께 하나의 퍼즐을 완성했습니다.</p>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
       </main>
 
