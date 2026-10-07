@@ -297,7 +297,7 @@ export default function Home() {
       )}
 
       <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr]">
-        <section className="flex min-h-0 flex-col rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-900/5 sm:p-6">
+        <section className="flex min-h-0 flex-col rounded-3xl bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 p-4 shadow-sm ring-1 ring-violet-900/5 sm:p-6">
           {screenState === "form" && (
             <ParticipantForm
               key={formKey}
