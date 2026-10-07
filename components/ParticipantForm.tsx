@@ -32,6 +32,7 @@ export default function ParticipantForm({
   onActivity,
   onDraftEmptyChange,
 }: ParticipantFormProps) {
+  const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
   const [maxReachedStep, setMaxReachedStep] = useState(0);
   const [name, setName] = useState("");
@@ -110,6 +111,17 @@ export default function ParticipantForm({
       emojiPositions,
     };
     onSubmit(draft);
+  }
+
+  if (!started) {
+    return (
+      <IntroScreen
+        onStart={() => {
+          onActivity();
+          setStarted(true);
+        }}
+      />
+    );
   }
 
   return (
@@ -199,6 +211,64 @@ export default function ParticipantForm({
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+// 참여 단계(이름 -> 한마디 -> 색상 -> 이모지 -> 확인)를 시작하기 전 보여주는 안내 화면.
+// 목표는 "무엇에 참여하는지 -> 무엇을 해야 하는지 -> 어떻게 다음으로 넘어가는지"를
+// 몇 초 안에 스캔해서 이해하고 바로 시작 버튼을 누르게 만드는 것 - 길게 읽는 설명 페이지가 아니다.
+const INTRO_STEPS = [
+  { no: "01", title: "기본 정보 입력", desc: "이름과 한마디를 남겨요" },
+  { no: "02", title: "조각 꾸미기", desc: "색상과 이모지로 꾸며요" },
+  { no: "03", title: "퍼즐에 조각 잇기", desc: "완성한 조각을 퍼즐에 이어요" },
+] as const;
+
+function IntroScreen({ onStart }: { onStart: () => void }) {
+  return (
+    <div className="flex h-full flex-col justify-center gap-6">
+      <div className="flex flex-col items-start gap-3">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-2xl">
+          🧩
+        </span>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-violet-500">광안리 해수욕장 환경정화 참여</p>
+          <h2 className="mt-1 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">
+            환경정화 릴레이에
+            <br />
+            오신 걸 환영해요!
+          </h2>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <p className="text-base font-bold text-violet-600">당신의 조각을 완성해 릴레이를 이어주세요.</p>
+        <p className="text-sm text-slate-500">
+          이름과 짧은 메모를 남기고, 단계에 따라 나만의 조각을 완성하면 됩니다.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {INTRO_STEPS.map(({ no, title, desc }) => (
+          <div key={no} className="flex items-center gap-3 rounded-2xl bg-violet-50 px-3 py-2.5 ring-1 ring-violet-100">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-xs font-extrabold text-white">
+              {no}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-slate-900">{title}</p>
+              <p className="text-xs text-slate-500">{desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={onStart}
+        className="h-14 w-full shrink-0 rounded-2xl bg-violet-600 text-lg font-bold text-white shadow-sm shadow-violet-600/30 transition-transform active:scale-[0.98]"
+      >
+        참여 시작하기 →
+      </button>
     </div>
   );
 }
