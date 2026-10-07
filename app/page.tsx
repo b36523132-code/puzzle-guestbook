@@ -289,7 +289,7 @@ export default function Home() {
       )}
 
       <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr]">
-        <section className="flex min-h-0 flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9">
+        <section className="flex min-h-0 flex-col rounded-3xl bg-violet-50 p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9">
           {screenState === "form" && (
             <ParticipantForm
               key={formKey}
@@ -325,7 +325,7 @@ export default function Home() {
           )}
         </section>
 
-        <section className="flex min-h-0 flex-col gap-4 rounded-3xl bg-gradient-to-br from-violet-600 to-purple-700 p-4 shadow-sm sm:gap-5 sm:p-6">
+        <section className="flex min-h-0 flex-col gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-900/5 sm:gap-5 sm:p-6">
           {activeBoard && (
             <div className="shrink-0 rounded-2xl bg-white px-4 py-3 shadow-sm sm:px-5 sm:py-4">
               <BoardProgress
