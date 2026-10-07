@@ -297,7 +297,7 @@ export default function Home() {
       )}
 
       <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr]">
-        <section className="flex min-h-0 flex-col rounded-3xl bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 p-4 shadow-sm ring-1 ring-violet-900/5 sm:p-6">
+        <section className="flex min-h-0 flex-col rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5 sm:p-7">
           {screenState === "form" && (
             <ParticipantForm
               key={formKey}
@@ -333,18 +333,20 @@ export default function Home() {
           )}
         </section>
 
-        <section className="flex min-h-0 flex-col gap-3 rounded-3xl bg-white/70 p-3 shadow-sm ring-1 ring-slate-900/5 sm:p-5">
+        <section className="flex min-h-0 flex-col gap-3 rounded-3xl bg-gradient-to-br from-violet-600 to-purple-700 p-3 shadow-sm sm:gap-4 sm:p-5">
           {activeBoard && (
-            <BoardProgress
-              boardNumber={activeBoard.boardNumber}
-              filledCount={participants.length}
-              totalPieces={activeBoard.totalPieces}
-              onShowPrevious={handleOpenPrevious}
-              hasPreviousBoards={activeBoard.boardNumber > 1}
-            />
+            <div className="shrink-0 rounded-2xl bg-white px-4 py-3 shadow-sm sm:px-5 sm:py-4">
+              <BoardProgress
+                boardNumber={activeBoard.boardNumber}
+                filledCount={participants.length}
+                totalPieces={activeBoard.totalPieces}
+                onShowPrevious={handleOpenPrevious}
+                hasPreviousBoards={activeBoard.boardNumber > 1}
+              />
+            </div>
           )}
 
-          <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+          <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-2xl bg-white p-3 shadow-sm sm:p-4">
             <PuzzleBoard
               containerRef={boardContainerRef}
               participants={participants}
