@@ -41,7 +41,7 @@ export default function BoardProgress({
           <button
             type="button"
             onClick={onShowPrevious}
-            className="h-9 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-500 sm:text-sm"
+            className="h-9 rounded-full border border-violet-100 bg-violet-50 px-3 text-xs font-semibold text-violet-600 sm:text-sm"
           >
             이전 퍼즐 보기
           </button>
