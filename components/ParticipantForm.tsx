@@ -195,7 +195,7 @@ export default function ParticipantForm({
             disabled={isSubmitting}
             className="h-14 flex-1 rounded-2xl bg-slate-900 text-lg font-bold text-white transition-transform active:scale-[0.98] disabled:bg-slate-300"
           >
-            {isSubmitting ? "조각을 잇는 중..." : "내 조각 이어가기"}
+            {isSubmitting ? "조각을 잋는 중..." : "내 조각 이어가기"}
           </button>
         )}
       </div>
@@ -219,7 +219,7 @@ function StepName({
   return (
     <div className="flex h-full flex-col justify-center gap-3">
       <div>
-        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">당신의 이름을 알려주세요</h2>
+        <h2 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">당신의 이름을 알려주세요</h2>
         <p className="mt-1 text-sm text-slate-500">이름 또는 닉네임이 조각에 남아요.</p>
       </div>
       <input
@@ -259,7 +259,7 @@ function StepMessage({
   return (
     <div className="flex h-full flex-col justify-center gap-3">
       <div>
-        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">한마디 남겨주세요</h2>
+        <h2 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">한마디 남겨주세요</h2>
         <p className="mt-1 text-sm text-slate-500">다음 사람에게 전하고 싶은 짧은 메시지를 적어보세요. 비워두고 넘어가도 괜찮아요.</p>
       </div>
       <textarea
@@ -283,7 +283,7 @@ function StepColor({ value, onChange }: { value: ColorVariantId; onChange: (id: 
   return (
     <div className="flex h-full flex-col justify-center gap-4">
       <div>
-        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">조각 뒷면 색상을 골라주세요</h2>
+        <h2 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">조각 뒷면 색상을 골라주세요</h2>
         <p className="mt-1 text-sm text-slate-500">조각을 뒤집으면 보이는 색이에요.</p>
       </div>
       <ColorPicker value={value} onChange={onChange} />
@@ -306,7 +306,7 @@ function StepEmoji({
     <div className="flex h-full flex-col gap-3 overflow-y-auto">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">이모지로 꾸며보세요</h2>
+          <h2 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">이모지로 꾸며보세요</h2>
           <p className="mt-1 text-sm text-slate-500">최대 {MAX_EMOJIS_PER_PIECE}개까지 고를 수 있어요. 생략해도 괜찮아요.</p>
         </div>
         <span className="mt-1 shrink-0 text-xs font-semibold text-slate-400">
@@ -336,7 +336,7 @@ function StepReview({
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
       <div>
-        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">조각을 확인해주세요</h2>
+        <h2 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">조각을 확인해주세요</h2>
         <p className="mt-1 text-sm text-slate-500">이대로 퍼즐판에 조각을 이어줄게요.</p>
       </div>
       <PiecePreview
