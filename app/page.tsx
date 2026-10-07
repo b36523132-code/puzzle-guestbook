@@ -288,7 +288,7 @@ export default function Home() {
         <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{loadError}</div>
       )}
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr]">
+      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1.15fr_1fr] xl:grid-cols-[1.2fr_1fr]">
         <section className="flex min-h-0 flex-col rounded-3xl bg-violet-50 p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9">
           {screenState === "form" && (
             <ParticipantForm
@@ -338,7 +338,7 @@ export default function Home() {
             </div>
           )}
 
-          <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-2xl bg-white p-3 shadow-sm sm:p-4">
+          <div className="relative flex min-h-0 flex-1 items-center justify-center">
             <PuzzleBoard
               containerRef={boardContainerRef}
               participants={participants}
