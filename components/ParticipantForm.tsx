@@ -266,7 +266,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
       <button
         type="button"
         onClick={onStart}
-        className="h-14 w-full shrink-0 rounded-2xl bg-violet-600 text-lg font-bold text-white shadow-sm shadow-violet-600/30 transition-transform active:scale-[0.98]"
+        className="h-20 w-full shrink-0 rounded-3xl bg-violet-600 text-2xl font-extrabold text-white shadow-md shadow-violet-600/40 transition-transform active:scale-[0.98] sm:h-24 sm:text-3xl"
       >
         참여 시작하기 →
       </button>
