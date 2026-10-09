@@ -21,7 +21,6 @@ export default function BoardProgress({
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div>
         <p className="flex flex-wrap items-baseline gap-1 text-base font-bold text-slate-700 sm:text-lg">
-          지금{" "}
           <motion.span
             key={filledCount}
             initial={{ scale: 1 }}
@@ -32,9 +31,6 @@ export default function BoardProgress({
             {filledCount}개
           </motion.span>
           의 조각이 이어졌어요.
-        </p>
-        <p className="text-xs text-slate-400 sm:text-sm">
-          {boardNumber}번째 퍼즐 · {filledCount} / {totalPieces}
         </p>
         <p className="mt-2 text-lg font-extrabold leading-snug text-slate-900 sm:text-2xl">
           당신의 조각 하나로 퍼즐이 완성돼요! 지금 함께해주세요 🧩
