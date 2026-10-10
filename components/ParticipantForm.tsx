@@ -207,7 +207,7 @@ export default function ParticipantForm({
             disabled={isSubmitting}
             className="h-14 flex-1 rounded-2xl bg-slate-900 text-lg font-bold text-white transition-transform active:scale-[0.98] disabled:bg-slate-300"
           >
-            {isSubmitting ? "조각을 잇는 중..." : "내 조각 이어가기"}
+            {isSubmitting ? "조각을 잇는 중..." : "퍼즐판에 조각 잇기"}
           </button>
         )}
       </div>
@@ -221,27 +221,25 @@ export default function ParticipantForm({
 const INTRO_STEPS = [
   { no: "01", title: "기본 정보 입력", desc: "이름과 한마디를 남겨요" },
   { no: "02", title: "조각 꾸미기", desc: "색상과 이모지로 꾸며요" },
-  { no: "03", title: "퍼즐에 조각 잇기", desc: "완성한 조각을 퍼즐에 이어요" },
+  { no: "03", title: "퍼즐에 조각 잇기", desc: "완성된 조각을 퍼즐에 이어요" },
 ] as const;
 
 function IntroScreen({ onStart }: { onStart: () => void }) {
   return (
     <div className="flex h-full flex-col justify-center gap-7">
       <div>
-        <p className="text-lg font-bold text-violet-500 sm:text-xl">퍼즐 방명록</p>
+        <p className="text-lg font-bold text-violet-500 sm:text-xl">퍼즐 방명록 | 릴레이 봉사 체험</p>
         <h2 className="mt-2 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
-          광안리 환경정화,
+          광안리 환경정화 릴레이,
           <br />
-          이제 당신의 조각을
-          <br />
-          이어볼 차례예요!
+          당신의 조각을 이어볼까요?
         </h2>
       </div>
 
-      <p className="text-lg font-bold leading-relaxed text-violet-600 sm:text-xl sm:leading-relaxed">
-        이름과 메모를 남기고
+      <p className="text-base font-bold leading-relaxed text-violet-600 sm:text-lg sm:leading-relaxed">
+        가상 봉사 체험을 통해 나만의 퍼즐 조각을 완성하고,
         <br />
-        나만의 조각을 완성해보세요.
+        다른 참여자들의 조각과 이어보세요.
       </p>
 
       <div className="flex flex-col">
@@ -263,13 +261,18 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={onStart}
-        className="h-28 w-full shrink-0 rounded-3xl bg-violet-600 text-3xl font-extrabold text-white shadow-md shadow-violet-600/40 transition-transform active:scale-[0.98] sm:h-32 sm:text-4xl"
-      >
-        참여 시작하기 →
-      </button>
+      <div className="flex flex-col gap-3">
+        <p className="text-center text-xs font-medium text-slate-400">
+          실제 봉사 신청이 아닌 전시 체험 프로그램입니다.
+        </p>
+        <button
+          type="button"
+          onClick={onStart}
+          className="h-28 w-full shrink-0 rounded-3xl bg-violet-600 text-3xl font-extrabold text-white shadow-md shadow-violet-600/40 transition-transform active:scale-[0.98] sm:h-32 sm:text-4xl"
+        >
+          퍼즐 체험 시작하기 →
+        </button>
+      </div>
     </div>
   );
 }
@@ -405,19 +408,39 @@ function StepReview({
   errorMessage: string | null;
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+    <div className="flex h-full flex-col items-center gap-2 overflow-y-auto text-center sm:gap-4">
       <div>
-        <h2 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">조각을 확인해주세요</h2>
-        <p className="mt-1 text-sm text-slate-500">이대로 퍼즐판에 조각을 이어줄게요.</p>
+        <h2 className="text-xl font-extrabold leading-tight text-slate-900 sm:text-3xl">
+          모든 단계를 완료하고
+          <br />
+          나만의 조각을 완성했어요!
+        </h2>
+        <p className="mt-1 text-xs text-slate-500 sm:text-sm">당신이 완성한 조각을 확인해 보세요.</p>
       </div>
+
       <PiecePreview
         ref={previewRef}
         name={name}
         message={message}
         colorVariant={colorVariant}
         emojis={emojis}
-        className="max-w-[180px]"
+        className="max-w-[130px] sm:max-w-[180px]"
       />
+
+      <div className="w-full rounded-2xl bg-violet-50 px-3 py-2.5 text-left sm:px-5 sm:py-5">
+        <p className="text-sm font-extrabold text-violet-700 sm:text-lg">작은 실천이 모여 깨끗한 광안리로!</p>
+        <p className="mt-1 text-xs leading-snug text-slate-600 sm:mt-1.5 sm:text-base sm:leading-relaxed">
+          해변의 쓰레기 하나를 줍는 작은 실천처럼, 한 사람의 봉사가 다음 사람에게 이어질 때 더 큰 변화를 만들 수 있어요.
+        </p>
+        <p className="mt-1 text-xs leading-snug text-slate-600 sm:mt-1.5 sm:text-base sm:leading-relaxed">
+          이제 가상 체험으로 완성한 당신의 조각을 광안리 환경정화 퍼즐에 더해보세요.
+        </p>
+      </div>
+
+      <p className="text-sm font-extrabold leading-snug text-slate-900 sm:text-xl">
+        아래 버튼을 눌러 완성된 조각을 퍼즐판에 이어주세요.
+      </p>
+
       {errorMessage && (
         <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600">
           {errorMessage}
