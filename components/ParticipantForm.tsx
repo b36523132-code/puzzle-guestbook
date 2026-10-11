@@ -239,7 +239,8 @@ const INTRO_STEPS = [
   { no: "03", title: "퍼즐에 조각 잇기", desc: "완성된 조각을 퍼즐에 이어요" },
 ] as const;
 
-const INTRO_PAGE_COUNT = 2 + INTRO_STEPS.length; // 남은 조각 안내 + 스토리 + 단계 안내(x3)
+const INTRO_PAGE_COUNT = 3; // 남은 조각 안내 + 스토리 + 단계 안내(자동 재생)
+const STEP_AUTOPLAY_MS = 2200;
 
 function IntroHeader() {
   return (
@@ -275,6 +276,7 @@ function IntroScreen({
   onStart: () => void;
 }) {
   const [page, setPage] = useState(0);
+  const [stepIndex, setStepIndex] = useState(0);
   const remaining = Math.max(totalPieces - filledCount, 0);
 
   function goNextPage() {
@@ -282,7 +284,14 @@ function IntroScreen({
     setPage((p) => Math.min(p + 1, INTRO_PAGE_COUNT - 1));
   }
 
-  const stepIndex = page - 2; // page 2,3,4 -> step 0,1,2
+  // 단계 안내 페이지에 머무는 동안 01 -> 02 -> 03 -> 01 ... 을 계속 자동으로 순환 재생한다.
+  useEffect(() => {
+    if (page !== 2) return;
+    const id = setInterval(() => {
+      setStepIndex((i) => (i + 1) % INTRO_STEPS.length);
+    }, STEP_AUTOPLAY_MS);
+    return () => clearInterval(id);
+  }, [page]);
 
   return (
     <div className="flex h-full flex-col justify-between gap-6 rounded-3xl bg-gradient-to-b from-violet-600 to-violet-800 p-6 text-white sm:p-8">
@@ -327,7 +336,7 @@ function IntroScreen({
         </div>
       )}
 
-      {page >= 2 && (
+      {page === 2 && (
         <div className="flex flex-1 flex-col justify-center gap-6">
           <h2 className="text-center text-2xl font-extrabold sm:text-3xl">방법은 간단해요!</h2>
           <div className="flex flex-col">
@@ -338,9 +347,8 @@ function IntroScreen({
                   key={no}
                   style={{ marginTop: i === 0 ? 0 : -14, zIndex: isActive ? 10 : 5 - i }}
                   className={
-                    isActive
-                      ? "relative rounded-2xl bg-amber-200 px-5 py-4 text-slate-900 shadow-lg"
-                      : "relative rounded-2xl bg-white/10 px-5 py-3 text-white/60"
+                    "relative rounded-2xl px-5 shadow-lg transition-all duration-500 ease-out " +
+                    (isActive ? "bg-amber-200 py-4 text-slate-900" : "bg-amber-100 py-3 text-slate-500")
                   }
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -348,7 +356,7 @@ function IntroScreen({
                       <p className={isActive ? "text-lg font-extrabold" : "text-sm font-semibold"}>{title}</p>
                       {isActive && <p className="mt-0.5 text-sm font-medium text-slate-700">{desc}</p>}
                     </div>
-                    <span className={isActive ? "shrink-0 text-xs font-bold text-slate-600" : "shrink-0 text-xs text-white/50"}>
+                    <span className={isActive ? "shrink-0 text-xs font-bold text-slate-600" : "shrink-0 text-xs text-slate-400"}>
                       {i + 1}단계
                     </span>
                   </div>
