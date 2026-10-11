@@ -319,7 +319,7 @@ export default function Home() {
           )}
         </section>
 
-        <section className="relative flex min-h-0 flex-col items-center justify-center rounded-3xl bg-white p-3 shadow-sm ring-1 ring-slate-900/5 sm:p-4">
+        <section className="relative flex min-h-0 flex-col items-center justify-center overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5">
           <PuzzleBoard
             containerRef={boardContainerRef}
             participants={participants}
