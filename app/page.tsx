@@ -52,6 +52,10 @@ export default function Home() {
   const [formKey, setFormKey] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [introActive, setIntroActive] = useState(true);
+  // 좌우 2단 레이아웃(lg 이상)에서만 퍼즐판 패널에 columns:rows 비율을 강제한다.
+  // 이렇게 패널 모양 자체를 퍼즐 비율에 맞춰두면, PuzzleBoard 내부의 "비율 유지 + 꽉 채우기"
+  // 계산이 여백 없이 정확히 들어맞는다 (이미지 찌그러짐 없이, 남는 공간도 없이).
+  const [isWideLayout, setIsWideLayout] = useState(false);
 
   const previewRef = useRef<HTMLDivElement | null>(null);
   const boardContainerRef = useRef<HTMLDivElement | null>(null);
@@ -66,6 +70,15 @@ export default function Home() {
   // ---- 마운트 시각을 최초 활동 시각으로 기록 ----
   useEffect(() => {
     lastActivityRef.current = Date.now();
+  }, []);
+
+  // ---- 좌우 2단 레이아웃 여부 추적 (Tailwind lg 브레이크포인트와 동일한 1024px) ----
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsWideLayout(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
   // ---- 최초 로드: 현재 active board 조회 ----
@@ -273,12 +286,13 @@ export default function Home() {
         <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{loadError}</div>
       )}
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[4fr_6fr] xl:grid-cols-[4fr_6fr]">
+      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:flex lg:flex-row xl:flex xl:flex-row">
         <section
           className={
-            screenState === "form" && introActive
+            (screenState === "form" && introActive
               ? "flex min-h-0 flex-col rounded-3xl shadow-sm"
-              : "flex min-h-0 flex-col rounded-3xl bg-violet-50 p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9"
+              : "flex min-h-0 flex-col rounded-3xl bg-violet-50 p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9") +
+            " lg:min-w-[320px] lg:flex-1"
           }
         >
           {screenState === "form" && (
@@ -319,7 +333,10 @@ export default function Home() {
           )}
         </section>
 
-        <section className="relative flex min-h-0 flex-col items-center justify-center overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5">
+        <section
+          className="relative flex min-h-0 flex-col items-center justify-center overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5 lg:h-full lg:shrink-0"
+          style={isWideLayout ? { aspectRatio: `${PUZZLE_CONFIG.columns} / ${PUZZLE_CONFIG.rows}` } : undefined}
+        >
           <PuzzleBoard
             containerRef={boardContainerRef}
             participants={participants}
