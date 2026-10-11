@@ -1,18 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import BoardProgress from "@/components/BoardProgress";
 import CompletionPanel from "@/components/CompletionPanel";
 import JoinAnimation from "@/components/JoinAnimation";
 import OrientationHint from "@/components/OrientationHint";
 import ParticipantForm from "@/components/ParticipantForm";
-import PreviousBoardViewer from "@/components/PreviousBoardViewer";
 import PuzzleBoard, { type RevealMode } from "@/components/PuzzleBoard";
 import { IDLE_RESET_TIMEOUT_MS, JOIN_ANIMATION_DURATION_MS, PUZZLE_CONFIG } from "@/config/puzzle";
 import { getCellScreenRect } from "@/lib/puzzle";
 import {
   fetchActiveBoard,
-  fetchCompletedBoards,
   fetchParticipantsByBoard,
   joinPuzzle,
   mapParticipantRow,
@@ -52,8 +49,6 @@ export default function Home() {
   const [revealMode, setRevealMode] = useState<RevealMode>("auto");
 
   const [celebrating, setCelebrating] = useState(false);
-  const [showPrevious, setShowPrevious] = useState(false);
-  const [completedBoards, setCompletedBoards] = useState<Board[]>([]);
   const [formKey, setFormKey] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [introActive, setIntroActive] = useState(true);
@@ -266,17 +261,6 @@ export default function Home() {
     setFormKey((k) => k + 1);
   }
 
-  async function handleOpenPrevious() {
-    markActivity();
-    try {
-      const boards = await fetchCompletedBoards();
-      setCompletedBoards(boards);
-      setShowPrevious(true);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   return (
     <div
       className="relative mx-auto flex h-[100dvh] max-w-[1600px] flex-col gap-3 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-violet-50 p-3 sm:gap-4 sm:p-5"
@@ -335,41 +319,27 @@ export default function Home() {
           )}
         </section>
 
-        <section className="flex min-h-0 flex-col gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-900/5 sm:gap-5 sm:p-6">
-          {activeBoard && (
-            <div className="shrink-0 rounded-2xl bg-white px-4 py-3 shadow-sm sm:px-5 sm:py-4">
-              <BoardProgress
-                boardNumber={activeBoard.boardNumber}
-                filledCount={participants.length}
-                totalPieces={activeBoard.totalPieces}
-                onShowPrevious={handleOpenPrevious}
-                hasPreviousBoards={activeBoard.boardNumber > 1}
-              />
+        <section className="relative flex min-h-0 flex-col items-center justify-center rounded-3xl bg-white p-3 shadow-sm ring-1 ring-slate-900/5 sm:p-4">
+          <PuzzleBoard
+            containerRef={boardContainerRef}
+            participants={participants}
+            rows={PUZZLE_CONFIG.rows}
+            columns={PUZZLE_CONFIG.columns}
+            incomingIds={incomingIds}
+            pendingHiddenPosition={pendingHiddenPosition}
+            revealPosition={revealPosition}
+            revealNonce={revealNonce}
+            revealMode={revealMode}
+            onRevealComplete={handleAutoRevealComplete}
+          />
+          {celebrating && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
+              <div className="animate-pulse rounded-2xl bg-white/80 px-6 py-4 text-center shadow-lg">
+                <p className="text-xl font-extrabold text-slate-900">48개의 조각이 하나로 이어졌어요.</p>
+                <p className="text-base text-slate-500">함께 하나의 퍼즐을 완성했습니다.</p>
+              </div>
             </div>
           )}
-
-          <div className="relative flex min-h-0 flex-1 items-center justify-center">
-            <PuzzleBoard
-              containerRef={boardContainerRef}
-              participants={participants}
-              rows={PUZZLE_CONFIG.rows}
-              columns={PUZZLE_CONFIG.columns}
-              incomingIds={incomingIds}
-              pendingHiddenPosition={pendingHiddenPosition}
-              revealPosition={revealPosition}
-              revealNonce={revealNonce}
-              revealMode={revealMode}
-              onRevealComplete={handleAutoRevealComplete}
-            />
-            {celebrating && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
-                <div className="animate-pulse rounded-2xl bg-white/80 px-6 py-4 text-center shadow-lg">
-                  <p className="text-xl font-extrabold text-slate-900">48개의 조각이 하나로 이어졌어요.</p>
-                  <p className="text-base text-slate-500">함께 하나의 퍼즐을 완성했습니다.</p>
-                </div>
-              </div>
-            )}
-          </div>
         </section>
       </main>
 
@@ -382,8 +352,6 @@ export default function Home() {
           onComplete={handleFlightComplete}
         />
       )}
-
-      {showPrevious && <PreviousBoardViewer boards={completedBoards} onClose={() => setShowPrevious(false)} />}
     </div>
   );
 }
