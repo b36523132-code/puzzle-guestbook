@@ -41,9 +41,12 @@ interface PuzzleBoardProps {
 
 /**
  * 퍼즐판은 항상 columns:rows 비율을 "정확히" 유지해야 한다 (SVG 안의 이미지/조각 경계와
- * HTML 오버레이 카드가 1px 오차 없이 겹쳐야 하기 때문).
- * CSS aspect-ratio 만으로는 max-width/max-height 가 동시에 걸릴 때 비율이 깨지는
- * 경우가 있어, 부모 영역 크기를 측정해서 "contain" 방식으로 정확한 픽셀 크기를 계산한다.
+ * HTML 오버레이 카드가 1px 오차 없이 겹쳐야 하기 때문) — 그래야 이미지나 조각 모양이
+ * 눌리거나 늘어나 보이지 않는다.
+ * 그와 동시에 부모 영역(카드)을 위아래·양옆 어디에도 여백 없이 꽉 채워야 하므로, 비율은
+ * 그대로 둔 채 부모 영역을 "덮는"(cover) 방식으로 픽셀 크기를 계산한다: 필요하면 퍼즐판 자체를
+ * 부모보다 조금 크게 그린 뒤, 부모의 overflow-hidden 으로 넘치는 부분만 살짝 잘라낸다
+ * (이미지가 비율대로 들어가고 가장자리만 잘리는 것이지, 찌그러지는 것이 아니다).
  *
  * 레이어 구성 (아래 -> 위):
  *  1) SVG 이미지 레이어 - 모든 칸에 하나의 공동 이미지를 조각 모양대로 잘라 보여준다. 항상 보인다.
@@ -79,20 +82,21 @@ export default function PuzzleBoard({
     if (!wrapperEl) return;
     const ratio = columns / rows;
 
-    // 이미지가 찌그러지지 않도록 columns:rows 비율을 "정확히" 유지한 채 끼워 맞춘다.
-    // (패널 쪽(app/page.tsx)에서 이 비율에 맞춰 패널 크기 자체를 미리 맞춰주므로,
-    // 데스크톱에서는 이 contain 계산이 사실상 패널을 여백 없이 꽉 채우게 된다.)
+    // 이미지/조각이 찌그러지지 않도록 columns:rows 비율은 "정확히" 유지한 채, 부모 영역을
+    // 빈틈없이 덮도록(cover) 크기를 계산한다. 폭 기준으로 맞췄을 때 세로가 부모보다 작게
+    // 남으면, 세로 기준으로 다시 맞춰 가로가 부모보다 커지도록 한다 (그 초과분은 바깥
+    // wrapper 의 overflow-hidden 이 잘라낸다) — 반대로 세로 기준이 이미 꽉 채운다면 그대로 둔다.
     const compute = () => {
       const availW = wrapperEl.clientWidth;
       const availH = wrapperEl.clientHeight;
       if (availW <= 0 || availH <= 0) return;
       let w = availW;
       let h = w / ratio;
-      if (h > availH) {
+      if (h < availH) {
         h = availH;
         w = h * ratio;
       }
-      setSize({ width: Math.floor(w), height: Math.floor(h) });
+      setSize({ width: Math.ceil(w), height: Math.ceil(h) });
     };
 
     compute();
@@ -194,7 +198,7 @@ export default function PuzzleBoard({
   }
 
   return (
-    <div ref={wrapperRef} className="flex h-full w-full items-center justify-center">
+    <div ref={wrapperRef} className="flex h-full w-full items-center justify-center overflow-hidden">
       <div
         ref={setBoardRef}
         className="relative select-none overflow-hidden rounded-2xl shadow-sm"
