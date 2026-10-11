@@ -198,7 +198,7 @@ export default function ParticipantForm({
 
       {step === LAST_STEP && !isSubmitting && (
         <div className="flex shrink-0 justify-center">
-          <div className="bubble-bounce relative rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-semibold leading-snug text-white shadow-lg sm:text-base">
+          <div className="bubble-bounce relative rounded-xl bg-slate-900 px-3 py-1.5 text-center text-xs font-semibold leading-snug text-white shadow-lg sm:px-4 sm:py-2 sm:text-base">
             아래 버튼을 눌러 완성된 조각을 퍼즐판에 이어주세요.
             <span className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-8 border-t-8 border-x-transparent border-t-slate-900" />
           </div>
@@ -323,20 +323,23 @@ function IntroScreen({
       <IntroHeader />
 
       <div
-        className="flex min-h-0 flex-1 flex-col touch-pan-y"
+        // 화면이 낮은 기기(예: 세로폭이 짧은 폰)에서는 내용이 넘칠 수 있다 - 겹쳐 보이거나
+        // 버튼을 가리는 대신, 이 영역만 세로로 살짝 스크롤해서 전부 확인할 수 있게 안전장치를 둔다.
+        // (내용이 다 들어가는 화면에서는 스크롤이 전혀 발생하지 않아 평소엔 보이지 않는다.)
+        className="flex min-h-0 flex-1 flex-col touch-pan-y overflow-y-auto"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         {page === 0 && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center sm:gap-6">
-            <div className="w-full rounded-2xl border border-white/25 px-4 py-5 sm:py-8">
-              <p className="text-base font-semibold text-white/70 sm:text-lg">남은 조각</p>
+          <div className="flex flex-1 flex-col items-center justify-start gap-4 text-center sm:justify-center sm:gap-6">
+            <div className="w-full rounded-2xl border border-white/25 px-4 py-6 sm:py-8">
+              <p className="text-lg font-semibold text-white/70 sm:text-xl">남은 조각</p>
               <p className="mt-2 flex items-baseline justify-center gap-2 font-extrabold text-amber-200">
-                <span className="text-6xl sm:text-7xl lg:text-8xl">{remaining}</span>
-                <span className="text-2xl sm:text-3xl lg:text-4xl">개</span>
+                <span className="text-7xl sm:text-8xl lg:text-9xl">{remaining}</span>
+                <span className="text-3xl sm:text-4xl lg:text-5xl">개</span>
               </p>
             </div>
-            <h2 className="text-2xl font-extrabold leading-tight sm:text-3xl lg:text-4xl">
+            <h2 className="text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
               남은 빈자리를 채워줄
               <br />
               당신이 필요해요!
@@ -348,7 +351,7 @@ function IntroScreen({
         )}
 
         {page === 1 && (
-          <div className="flex flex-1 flex-col justify-center gap-4 sm:gap-6">
+          <div className="flex flex-1 flex-col justify-start gap-4 sm:justify-center sm:gap-6">
             <p className="text-base font-bold leading-relaxed sm:text-lg lg:text-xl">
               반짝이는 바다와 아름다운
               <br />
@@ -367,7 +370,7 @@ function IntroScreen({
         )}
 
         {page === 2 && (
-          <div className="flex flex-1 flex-col justify-center gap-3 sm:gap-4">
+          <div className="flex flex-1 flex-col justify-start gap-3 sm:justify-center sm:gap-4">
             <h2 className="text-center text-2xl font-extrabold sm:text-3xl">방법은 간단해요!</h2>
             <div className="flex flex-col gap-2 sm:gap-3">
               {INTRO_STEPS.map(({ no, title, desc }, i) => (
@@ -544,9 +547,9 @@ function StepReview({
   errorMessage: string | null;
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-start gap-1 overflow-y-auto text-center sm:justify-center sm:gap-3">
+    <div className="flex h-full min-h-0 flex-col items-center justify-center gap-0.5 overflow-hidden text-center sm:gap-3">
       <div>
-        <h2 className="text-lg font-extrabold leading-tight text-slate-900 sm:text-2xl lg:text-3xl">
+        <h2 className="text-sm font-extrabold leading-tight text-slate-900 sm:text-2xl lg:text-3xl">
           모든 단계를 완료하고
           <br />
           나만의 조각을 완성했어요!
@@ -562,12 +565,14 @@ function StepReview({
         message={message}
         colorVariant={colorVariant}
         emojis={emojis}
-        className="max-w-[90px] sm:max-w-[150px] lg:max-w-[180px]"
+        className="max-w-[64px] sm:max-w-[150px] lg:max-w-[180px]"
       />
 
-      <div className="w-full rounded-2xl bg-violet-50 px-4 py-2 text-left sm:px-5 sm:py-4">
-        <p className="text-xs font-extrabold text-violet-700 sm:text-base lg:text-lg">작은 실천이 모여 깨끗한 광안리로!</p>
-        <p className="mt-0.5 text-[11px] leading-snug text-slate-600 sm:text-sm lg:text-base">
+      {/* 작은 화면(세로폭이 짧은 폰)에서는 이 안내 카드까지 다 넣으면 스크롤이 필요해지므로
+          숨기고, 조각 미리보기(핵심 확인 대상)가 항상 스크롤 없이 한 화면에 들어오게 한다. */}
+      <div className="hidden w-full rounded-2xl bg-violet-50 px-4 py-2 text-left sm:block sm:px-5 sm:py-4">
+        <p className="text-base font-extrabold text-violet-700 lg:text-lg">작은 실천이 모여 깨끗한 광안리로!</p>
+        <p className="mt-0.5 text-sm leading-snug text-slate-600 lg:text-base">
           해변의 쓰레기 하나를 줍는 작은 실천처럼, 한 사람의 봉사가 다음 사람에게 이어질 때 더 큰 변화를 만들 수 있어요.
         </p>
       </div>
