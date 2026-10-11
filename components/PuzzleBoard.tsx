@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useEffect, useMemo, useRef, useState } from "react";
 import { getColorVariant } from "@/config/colors";
 import { PUZZLE_CONFIG, JOIN_REVEAL_HOLD_MS, MANUAL_REVEAL_GLOW_MS, FLIP_DURATION_MS } from "@/config/puzzle";
 import {
@@ -77,7 +77,9 @@ export default function PuzzleBoard({
   // 조각을 눌렀을 때 이름/한마디를 줄임 없이 자세히 보여주는 상세 카드가 열려있는 위치
   const [detailPosition, setDetailPosition] = useState<number | null>(null);
 
-  useEffect(() => {
+  // useLayoutEffect 로 브라우저가 화면을 그리기 전에 먼저 정확한 크기를 측정해 적용한다.
+  // (useEffect 를 쓰면 "잘못된 크기로 한 번 그렸다가 바로 고치는" 깜빡임이 생길 수 있다.)
+  useLayoutEffect(() => {
     const wrapperEl = wrapperRef.current;
     if (!wrapperEl) return;
     const ratio = columns / rows;
@@ -201,8 +203,19 @@ export default function PuzzleBoard({
     <div ref={wrapperRef} className="flex h-full w-full items-center justify-center overflow-hidden">
       <div
         ref={setBoardRef}
-        className="relative select-none overflow-hidden rounded-2xl shadow-sm"
-        style={{ width: size.width || "100%", height: size.height || "100%" }}
+        // wrapper 가 flex 컨테이너라서, flex 의 기본 shrink 동작이 cover 계산으로 일부러
+        // 부모보다 "크게" 잡은 width/height 를 다시 부모 크기에 맞춰 줄여버릴 수 있다
+        // (그 결과 비율이 깨진 채로 눌려 보이는 버그가 있었다) — shrink-0 로 이를 막는다.
+        className="relative shrink-0 select-none overflow-hidden rounded-2xl shadow-sm"
+        style={
+          size.width && size.height
+            ? { width: size.width, height: size.height }
+            // JS 로 정확한 cover 크기를 측정하기 전(최초 렌더/서버 렌더 시점)에는, 비율이 안 맞는
+            // 부모에 width/height 100%를 동시에 강제하면 SVG(preserveAspectRatio="none")가
+            // 그대로 찌그러져 보이는 "깜빡임"이 생긴다. 대신 비율을 지키는 aspect-ratio 로
+            // 안전하게 기본값을 잡아, 측정이 끝나기 전까지도 절대 찌그러져 보이지 않게 한다.
+            : { width: "100%", aspectRatio: `${columns} / ${rows}` }
+        }
         aria-label={`${PUZZLE_CONFIG.title} 퍼즐판`}
       >
         {/* 1) 공동 이미지 레이어 - 항상 완성된 사진처럼 이어져 보인다 */}
