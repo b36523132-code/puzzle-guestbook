@@ -332,14 +332,14 @@ function IntroScreen({
             {INTRO_STEPS.map(({ no, title, desc }, i) => (
               <div
                 key={no}
-                className="flex items-center gap-4 rounded-2xl bg-amber-100 px-5 py-4 text-slate-900 shadow-lg sm:px-6 sm:py-5"
+                className="flex items-center gap-4 rounded-2xl bg-white/10 px-5 py-4 text-white shadow-lg ring-1 ring-white/15 backdrop-blur-sm sm:px-6 sm:py-5"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-400 text-xl font-extrabold text-slate-900 sm:h-14 sm:w-14 sm:text-2xl">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-xl font-extrabold text-white sm:h-14 sm:w-14 sm:text-2xl">
                   {i + 1}
                 </span>
                 <div className="min-w-0">
                   <p className="text-lg font-extrabold sm:text-2xl">{title}</p>
-                  <p className="mt-0.5 text-base font-medium text-slate-700 sm:text-lg">{desc}</p>
+                  <p className="mt-0.5 text-base font-medium text-white/70 sm:text-lg">{desc}</p>
                 </div>
               </div>
             ))}
