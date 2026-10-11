@@ -198,7 +198,7 @@ export default function ParticipantForm({
 
       {step === LAST_STEP && !isSubmitting && (
         <div className="flex shrink-0 justify-center">
-          <div className="bubble-bounce relative rounded-xl bg-slate-900 px-3 py-1.5 text-center text-xs font-semibold leading-snug text-white shadow-lg sm:text-sm">
+          <div className="bubble-bounce relative rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-semibold leading-snug text-white shadow-lg sm:text-base">
             아래 버튼을 눌러 완성된 조각을 퍼즐판에 이어주세요.
             <span className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-8 border-t-8 border-x-transparent border-t-slate-900" />
           </div>
@@ -211,7 +211,7 @@ export default function ParticipantForm({
             type="button"
             onClick={goBack}
             disabled={isSubmitting}
-            className="h-16 shrink-0 rounded-2xl bg-slate-100 px-6 text-lg font-bold text-slate-600 transition-transform active:scale-[0.98] disabled:opacity-50"
+            className="h-20 shrink-0 rounded-2xl bg-slate-100 px-7 text-xl font-bold text-slate-600 transition-transform active:scale-[0.98] disabled:opacity-50"
           >
             이전
           </button>
@@ -220,7 +220,7 @@ export default function ParticipantForm({
           <button
             type="button"
             onClick={goNext}
-            className="h-16 flex-1 rounded-2xl bg-slate-900 text-xl font-bold text-white transition-transform active:scale-[0.98]"
+            className="h-20 flex-1 rounded-2xl bg-slate-900 text-2xl font-bold text-white transition-transform active:scale-[0.98]"
           >
             다음
           </button>
@@ -229,7 +229,7 @@ export default function ParticipantForm({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`h-16 flex-1 rounded-2xl bg-slate-900 text-xl font-bold text-white transition-transform active:scale-[0.98] disabled:bg-slate-300 ${
+            className={`h-20 flex-1 rounded-2xl bg-slate-900 text-2xl font-bold text-white transition-transform active:scale-[0.98] disabled:bg-slate-300 ${
               isSubmitting ? "" : "cta-glow"
             }`}
           >
@@ -254,7 +254,7 @@ const INTRO_PAGE_COUNT = 3; // 남은 조각 안내 + 스토리 + 단계 안내
 
 function IntroHeader() {
   return (
-    <div className="flex items-center justify-between text-sm font-semibold tracking-wide text-white/70 sm:text-base">
+    <div className="flex items-center justify-between text-base font-semibold tracking-wide text-white/70 sm:text-lg">
       <span>가상 릴레이 봉사체험</span>
       <span>퍼즐 방명록</span>
     </div>
@@ -328,26 +328,28 @@ function IntroScreen({
         onTouchEnd={handleTouchEnd}
       >
         {page === 0 && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-            <div className="w-full rounded-2xl border border-white/25 px-4 py-7">
-              <p className="text-base font-semibold text-white/70">남은 조각</p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center sm:gap-6">
+            <div className="w-full rounded-2xl border border-white/25 px-4 py-5 sm:py-8">
+              <p className="text-base font-semibold text-white/70 sm:text-lg">남은 조각</p>
               <p className="mt-2 flex items-baseline justify-center gap-2 font-extrabold text-amber-200">
-                <span className="text-7xl">{remaining}</span>
-                <span className="text-3xl">개</span>
+                <span className="text-6xl sm:text-7xl lg:text-8xl">{remaining}</span>
+                <span className="text-2xl sm:text-3xl lg:text-4xl">개</span>
               </p>
             </div>
-            <h2 className="text-2xl font-extrabold leading-tight">
+            <h2 className="text-2xl font-extrabold leading-tight sm:text-3xl lg:text-4xl">
               남은 빈자리를 채워줄
               <br />
               당신이 필요해요!
             </h2>
-            <p className="text-sm text-white/60">ⓘ 본 프로그램은 실제 봉사 신청 없이 참여할 수 있는 가상 릴레이 봉사 체험입니다.</p>
+            <p className="whitespace-nowrap text-[10px] text-white/60 sm:text-xs">
+              ⓘ 본 프로그램은 실제 봉사 신청 없이 참여할 수 있는 가상 릴레이 봉사 체험입니다.
+            </p>
           </div>
         )}
 
         {page === 1 && (
-          <div className="flex flex-1 flex-col justify-center gap-6">
-            <p className="text-base font-bold leading-relaxed">
+          <div className="flex flex-1 flex-col justify-center gap-4 sm:gap-6">
+            <p className="text-base font-bold leading-relaxed sm:text-lg lg:text-xl">
               반짝이는 바다와 아름다운
               <br />
               풍경으로 가득한 광안리,
@@ -356,7 +358,7 @@ function IntroScreen({
               <br />
               손길이 필요한 쓰레기가 남아있어요.
             </p>
-            <p className="text-xl font-extrabold leading-snug text-amber-200">
+            <p className="text-xl font-extrabold leading-snug text-amber-200 sm:text-2xl lg:text-3xl">
               깨끗한 광안리를 완성할
               <br />
               다음 주인공이 되어주세요!
@@ -365,20 +367,20 @@ function IntroScreen({
         )}
 
         {page === 2 && (
-          <div className="flex flex-1 flex-col justify-center gap-4">
-            <h2 className="text-center text-2xl font-extrabold">방법은 간단해요!</h2>
-            <div className="flex flex-col gap-2.5">
+          <div className="flex flex-1 flex-col justify-center gap-3 sm:gap-4">
+            <h2 className="text-center text-2xl font-extrabold sm:text-3xl">방법은 간단해요!</h2>
+            <div className="flex flex-col gap-2 sm:gap-3">
               {INTRO_STEPS.map(({ no, title, desc }, i) => (
                 <div
                   key={no}
-                  className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 text-white shadow-lg ring-1 ring-white/15 backdrop-blur-sm"
+                  className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 text-white shadow-lg ring-1 ring-white/15 backdrop-blur-sm sm:px-5 sm:py-4"
                 >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-lg font-extrabold text-white">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-lg font-extrabold text-white sm:h-12 sm:w-12 sm:text-xl">
                     {i + 1}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-base font-extrabold">{title}</p>
-                    <p className="mt-0.5 text-sm font-medium text-white/70">{desc}</p>
+                    <p className="text-base font-extrabold sm:text-lg">{title}</p>
+                    <p className="mt-0.5 text-sm font-medium text-white/70 sm:text-base">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -397,7 +399,7 @@ function IntroScreen({
       <button
         type="button"
         onClick={page === INTRO_PAGE_COUNT - 1 ? onStart : goNextPage}
-        className="h-16 w-full shrink-0 rounded-2xl bg-white text-xl font-extrabold text-slate-900 shadow-md transition-transform active:scale-[0.98] sm:h-20 sm:text-2xl"
+        className="h-20 w-full shrink-0 rounded-2xl bg-white text-2xl font-extrabold text-slate-900 shadow-md transition-transform active:scale-[0.98] sm:h-24 sm:text-3xl"
       >
         {page === 0 ? "참여하기" : page === 1 ? "다음" : "이어가기"}
       </button>
@@ -421,8 +423,8 @@ function StepName({
   return (
     <div className="flex h-full flex-col justify-center gap-4">
       <div>
-        <h2 className="text-xl font-extrabold leading-tight text-slate-900">당신의 이름을 알려주세요</h2>
-        <p className="mt-2 text-sm text-slate-500">이름 또는 닉네임이 조각에 남아요.</p>
+        <h2 className="text-3xl font-extrabold leading-tight text-slate-900">당신의 이름을 알려주세요</h2>
+        <p className="mt-2 text-lg text-slate-500">이름 또는 닉네임이 조각에 남아요.</p>
       </div>
       <input
         type="text"
@@ -435,9 +437,9 @@ function StepName({
         placeholder="이름 또는 닉네임"
         maxLength={MAX_NAME_LENGTH}
         disabled={disabled}
-        className="h-16 w-full rounded-xl border border-slate-200 bg-white px-5 text-xl font-medium outline-none focus:border-violet-400 disabled:bg-slate-50"
+        className="h-20 w-full rounded-xl border border-slate-200 bg-white px-6 text-2xl font-medium outline-none focus:border-violet-400 disabled:bg-slate-50"
       />
-      <p className="text-sm text-slate-400">
+      <p className="text-base text-slate-400">
         작성한 이름 또는 닉네임은 전시 퍼즐에 공개됩니다. ({name.trim().length}/{MAX_NAME_LENGTH})
       </p>
       {error && (
@@ -461,8 +463,8 @@ function StepMessage({
   return (
     <div className="flex h-full flex-col justify-center gap-4">
       <div>
-        <h2 className="text-xl font-extrabold leading-tight text-slate-900">한마디 남겨주세요</h2>
-        <p className="mt-2 text-sm text-slate-500">
+        <h2 className="text-3xl font-extrabold leading-tight text-slate-900">한마디 남겨주세요</h2>
+        <p className="mt-2 text-lg text-slate-500">
           다음 사람에게 전하고 싶은
           <br />
           짧은 메시지를 적어보세요.
@@ -478,9 +480,9 @@ function StepMessage({
         maxLength={MAX_MESSAGE_LENGTH}
         disabled={disabled}
         rows={4}
-        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-5 py-4 text-lg font-medium outline-none focus:border-violet-400 disabled:bg-slate-50"
+        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-6 py-5 text-xl font-medium outline-none focus:border-violet-400 disabled:bg-slate-50"
       />
-      <p className="text-right text-sm font-medium text-slate-400">
+      <p className="text-right text-base font-medium text-slate-400">
         {message.trim().length}/{MAX_MESSAGE_LENGTH}
       </p>
     </div>
@@ -491,8 +493,8 @@ function StepColor({ value, onChange }: { value: ColorVariantId; onChange: (id: 
   return (
     <div className="flex h-full flex-col justify-center gap-4">
       <div>
-        <h2 className="text-xl font-extrabold leading-tight text-slate-900">조각 뒷면 색상을 골라주세요</h2>
-        <p className="mt-2 text-sm text-slate-500">조각을 뒤집으면 보이는 색이에요.</p>
+        <h2 className="text-3xl font-extrabold leading-tight text-slate-900">조각 뒷면 색상을 골라주세요</h2>
+        <p className="mt-2 text-lg text-slate-500">조각을 뒤집으면 보이는 색이에요.</p>
       </div>
       <ColorPicker value={value} onChange={onChange} />
     </div>
@@ -514,10 +516,10 @@ function StepEmoji({
     <div className="flex h-full flex-col gap-3 overflow-y-auto">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h2 className="text-xl font-extrabold leading-tight text-slate-900">이모지로 꾸며보세요</h2>
-          <p className="mt-2 text-sm text-slate-500">최대 {MAX_EMOJIS_PER_PIECE}개까지 고를 수 있어요. 생략해도 괜찮아요.</p>
+          <h2 className="text-3xl font-extrabold leading-tight text-slate-900">이모지로 꾸며보세요</h2>
+          <p className="mt-2 text-lg text-slate-500">최대 {MAX_EMOJIS_PER_PIECE}개까지 고를 수 있어요. 생략해도 괜찮아요.</p>
         </div>
-        <span className="mt-1 shrink-0 text-sm font-semibold text-slate-400">
+        <span className="mt-1 shrink-0 text-base font-semibold text-slate-400">
           {emojis.length}/{MAX_EMOJIS_PER_PIECE}
         </span>
       </div>
@@ -542,14 +544,16 @@ function StepReview({
   errorMessage: string | null;
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-2 overflow-y-auto text-center sm:gap-3">
+    <div className="flex h-full flex-col items-center justify-start gap-1 overflow-y-auto text-center sm:justify-center sm:gap-3">
       <div>
-        <h2 className="text-lg font-extrabold leading-tight text-slate-900 sm:text-2xl">
+        <h2 className="text-lg font-extrabold leading-tight text-slate-900 sm:text-2xl lg:text-3xl">
           모든 단계를 완료하고
           <br />
           나만의 조각을 완성했어요!
         </h2>
-        <p className="mt-1 text-xs text-slate-500 sm:text-base">당신이 완성한 조각을 확인해 보세요.</p>
+        <p className="mt-1 hidden text-sm text-slate-500 sm:block sm:text-base lg:text-lg">
+          당신이 완성한 조각을 확인해 보세요.
+        </p>
       </div>
 
       <PiecePreview
@@ -558,12 +562,12 @@ function StepReview({
         message={message}
         colorVariant={colorVariant}
         emojis={emojis}
-        className="max-w-[100px] sm:max-w-[160px]"
+        className="max-w-[90px] sm:max-w-[150px] lg:max-w-[180px]"
       />
 
-      <div className="w-full rounded-2xl bg-violet-50 px-3 py-2 text-left sm:px-4 sm:py-3">
-        <p className="text-sm font-extrabold text-violet-700">작은 실천이 모여 깨끗한 광안리로!</p>
-        <p className="mt-0.5 text-xs leading-snug text-slate-600">
+      <div className="w-full rounded-2xl bg-violet-50 px-4 py-2 text-left sm:px-5 sm:py-4">
+        <p className="text-xs font-extrabold text-violet-700 sm:text-base lg:text-lg">작은 실천이 모여 깨끗한 광안리로!</p>
+        <p className="mt-0.5 text-[11px] leading-snug text-slate-600 sm:text-sm lg:text-base">
           해변의 쓰레기 하나를 줍는 작은 실천처럼, 한 사람의 봉사가 다음 사람에게 이어질 때 더 큰 변화를 만들 수 있어요.
         </p>
       </div>
