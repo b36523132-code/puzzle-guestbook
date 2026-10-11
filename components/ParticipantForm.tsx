@@ -14,9 +14,13 @@ interface ParticipantFormProps {
   previewRef: React.RefObject<HTMLDivElement | null>;
   submitStatus: SubmitStatus;
   errorMessage: string | null;
+  totalPieces: number;
+  filledCount: number;
   onSubmit: (draft: DraftPiece) => void;
   onActivity: () => void;
   onDraftEmptyChange: (isEmpty: boolean) => void;
+  /** 인트로(캐러셀) 화면을 보여주는 중인지 여부. 좌측 패널의 배경 테마를 바꾸는 데 쓰인다. */
+  onIntroActiveChange?: (active: boolean) => void;
 }
 
 // 한 화면에 모든 입력을 몰아넣지 않고, "지금 할 일 하나"만 보여주는 단계로 나눈다.
@@ -28,9 +32,12 @@ export default function ParticipantForm({
   previewRef,
   submitStatus,
   errorMessage,
+  totalPieces,
+  filledCount,
   onSubmit,
   onActivity,
   onDraftEmptyChange,
+  onIntroActiveChange,
 }: ParticipantFormProps) {
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
@@ -54,6 +61,11 @@ export default function ParticipantForm({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, message, emojis, colorVariant]);
+
+  useEffect(() => {
+    onIntroActiveChange?.(!started);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [started]);
 
   function goToStep(index: number) {
     onActivity();
@@ -116,6 +128,9 @@ export default function ParticipantForm({
   if (!started) {
     return (
       <IntroScreen
+        totalPieces={totalPieces}
+        filledCount={filledCount}
+        onPageChange={onActivity}
         onStart={() => {
           onActivity();
           setStarted(true);
@@ -215,64 +230,143 @@ export default function ParticipantForm({
   );
 }
 
-// 참여 단계(이름 -> 한마디 -> 색상 -> 이모지 -> 확인)를 시작하기 전 보여주는 안내 화면.
-// 목표는 "무엇에 참여하는지 -> 무엇을 해야 하는지 -> 어떻게 다음으로 넘어가는지"를
-// 몇 초 안에 스캔해서 이해하고 바로 시작 버튼을 누르게 만드는 것 - 길게 읽는 설명 페이지가 아니다.
+// 참여 단계(이름 -> 한마디 -> 색상 -> 이모지 -> 확인)를 시작하기 전 보여주는 안내 캐러셀.
+// 5개의 카드를 순서대로 넘기며 "왜 참여하는지 -> 무엇을 하는지 -> 어떤 순서로 하는지"를
+// 한 번에 하나씩 보여준 뒤, 마지막 "이어가기"에서 실제 입력 단계로 넘어간다.
 const INTRO_STEPS = [
-  { no: "01", title: "기본 정보 입력", desc: "이름과 한마디를 남겨요" },
+  { no: "01", title: "기본 정보 입력하기", desc: "이름과 한마디를 남겨요" },
   { no: "02", title: "조각 꾸미기", desc: "색상과 이모지로 꾸며요" },
   { no: "03", title: "퍼즐에 조각 잇기", desc: "완성된 조각을 퍼즐에 이어요" },
 ] as const;
 
-function IntroScreen({ onStart }: { onStart: () => void }) {
+const INTRO_PAGE_COUNT = 2 + INTRO_STEPS.length; // 남은 조각 안내 + 스토리 + 단계 안내(x3)
+
+function IntroHeader() {
   return (
-    <div className="flex h-full flex-col justify-center gap-7">
-      <div>
-        <p className="text-lg font-bold text-violet-500 sm:text-xl">퍼즐 방명록 | 릴레이 봉사 체험</p>
-        <h2 className="mt-2 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
-          광안리 환경정화 릴레이,
-          <br />
-          당신의 조각을 이어볼까요?
-        </h2>
-      </div>
+    <div className="flex items-center justify-between text-xs font-semibold tracking-wide text-white/70">
+      <span>가상 릴레이 봉사체험</span>
+      <span>퍼즐 방명록</span>
+    </div>
+  );
+}
 
-      <p className="text-base font-bold leading-relaxed text-violet-600 sm:text-lg sm:leading-relaxed">
-        가상 봉사 체험을 통해 나만의 퍼즐 조각을 완성하고,
-        <br />
-        다른 참여자들의 조각과 이어보세요.
-      </p>
+function IntroDots({ total, current }: { total: number; current: number }) {
+  return (
+    <div className="flex items-center justify-center gap-1.5">
+      {Array.from({ length: total }).map((_, i) => (
+        <span
+          key={i}
+          className={`h-1.5 rounded-full transition-all ${i === current ? "w-6 bg-white" : "w-1.5 bg-white/35"}`}
+        />
+      ))}
+    </div>
+  );
+}
 
-      <div className="flex flex-col">
-        {INTRO_STEPS.map(({ no, title, desc }, i) => (
-          <div
-            key={no}
-            className={`flex items-center gap-3 py-3 ${
-              i !== INTRO_STEPS.length - 1 ? "border-b border-slate-100" : ""
-            }`}
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-600 text-xs font-extrabold text-white">
-              {no}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-base font-bold text-slate-900">{title}</p>
-              <p className="text-sm text-slate-400">{desc}</p>
-            </div>
+function IntroScreen({
+  totalPieces,
+  filledCount,
+  onPageChange,
+  onStart,
+}: {
+  totalPieces: number;
+  filledCount: number;
+  onPageChange: () => void;
+  onStart: () => void;
+}) {
+  const [page, setPage] = useState(0);
+  const remaining = Math.max(totalPieces - filledCount, 0);
+
+  function goNextPage() {
+    onPageChange();
+    setPage((p) => Math.min(p + 1, INTRO_PAGE_COUNT - 1));
+  }
+
+  const stepIndex = page - 2; // page 2,3,4 -> step 0,1,2
+
+  return (
+    <div className="flex h-full flex-col justify-between gap-6 rounded-3xl bg-gradient-to-b from-violet-600 to-violet-800 p-6 text-white sm:p-8">
+      <IntroHeader />
+
+      {page === 0 && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+          <div className="w-full rounded-2xl border border-white/25 px-6 py-7">
+            <p className="text-sm font-semibold text-white/70">남은 조각</p>
+            <p className="mt-1 flex items-baseline justify-center gap-1 font-extrabold text-amber-200">
+              <span className="text-6xl sm:text-7xl">{remaining}</span>
+              <span className="text-2xl sm:text-3xl">개</span>
+            </p>
           </div>
-        ))}
-      </div>
+          <h2 className="text-2xl font-extrabold leading-tight sm:text-3xl">남은 빈자리를 채워줄 당신이 필요해요!</h2>
+          <p className="text-xs text-white/60 sm:text-sm">
+            ⓘ 본 프로그램은 실제 봉사 신청 없이 참여할 수 있는 가상 릴레이 봉사 체험입니다.
+          </p>
+        </div>
+      )}
 
-      <div className="flex flex-col gap-3">
-        <p className="text-center text-xs font-medium text-slate-400">
-          실제 봉사 신청이 아닌 전시 체험 프로그램입니다.
-        </p>
-        <button
-          type="button"
-          onClick={onStart}
-          className="h-28 w-full shrink-0 rounded-3xl bg-violet-600 text-3xl font-extrabold text-white shadow-md shadow-violet-600/40 transition-transform active:scale-[0.98] sm:h-32 sm:text-4xl"
-        >
-          퍼즐 체험 시작하기 →
-        </button>
-      </div>
+      {page === 1 && (
+        <div className="flex flex-1 flex-col justify-center gap-6">
+          <p className="text-base font-bold leading-relaxed sm:text-lg">
+            반짝이는 바다와 아름다운 풍경으로 가득한 광안리,
+            <br />
+            하지만 해변 곳곳에는 누군가의 손길이
+            <br />
+            필요한 쓰레기가 남아있어요.
+            <br />
+            <br />
+            이제 가상 환경정화 릴레이에서 당신의
+            <br />
+            조각을 더해, 광안리의 변화를 함께 완성해볼까요?
+          </p>
+          <p className="text-xl font-extrabold leading-snug text-amber-200 sm:text-2xl">
+            깨끗한 광안리를 완성할
+            <br />
+            다음 주인공이 되어주세요!
+          </p>
+          <IntroDots total={INTRO_PAGE_COUNT - 1} current={page - 1} />
+        </div>
+      )}
+
+      {page >= 2 && (
+        <div className="flex flex-1 flex-col justify-center gap-6">
+          <h2 className="text-center text-2xl font-extrabold sm:text-3xl">방법은 간단해요!</h2>
+          <div className="flex flex-col">
+            {INTRO_STEPS.map(({ no, title, desc }, i) => {
+              const isActive = i === stepIndex;
+              return (
+                <div
+                  key={no}
+                  style={{ marginTop: i === 0 ? 0 : -14, zIndex: isActive ? 10 : 5 - i }}
+                  className={
+                    isActive
+                      ? "relative rounded-2xl bg-amber-200 px-5 py-4 text-slate-900 shadow-lg"
+                      : "relative rounded-2xl bg-white/10 px-5 py-3 text-white/60"
+                  }
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className={isActive ? "text-lg font-extrabold" : "text-sm font-semibold"}>{title}</p>
+                      {isActive && <p className="mt-0.5 text-sm font-medium text-slate-700">{desc}</p>}
+                    </div>
+                    <span className={isActive ? "shrink-0 text-xs font-bold text-slate-600" : "shrink-0 text-xs text-white/50"}>
+                      {i + 1}단계
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <IntroDots total={INTRO_PAGE_COUNT - 1} current={page - 1} />
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={page === INTRO_PAGE_COUNT - 1 ? onStart : goNextPage}
+        className="h-16 w-full shrink-0 rounded-2xl bg-white text-xl font-extrabold text-slate-900 shadow-md transition-transform active:scale-[0.98] sm:h-20 sm:text-2xl"
+      >
+        {page === 0 ? "참여하기" : page === 1 ? "다음" : "이어가기"}
+      </button>
     </div>
   );
 }
