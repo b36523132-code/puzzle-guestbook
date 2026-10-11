@@ -52,13 +52,15 @@ export default function Home() {
   const [formKey, setFormKey] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [introActive, setIntroActive] = useState(true);
-  // 퍼즐판을 담는 60% 칸("슬롯") 안에서, 비율이 깨지지 않도록 contain 방식으로 계산한
-  // 실제 카드 크기. 카드 자체를 이 크기로 그려서 슬롯 안에 남는 흰 여백을 없앤다.
+  // 데스크톱(lg 이상)에서는 퍼즐판 카드가 행 전체 높이를 꽉 채우도록 하고, 그 높이에
+  // columns:rows 비율을 곱한 값을 카드의 가로 폭으로 그대로 쓴다. 이러면 비율이 깨지지
+  // 않으면서도 위아래·양옆 어디에도 여백이 남지 않는다 (왼쪽 폼 패널은 남은 폭을 그대로 쓴다).
+  const [isWideLayout, setIsWideLayout] = useState(false);
   const [boardBoxSize, setBoardBoxSize] = useState<{ width: number; height: number } | null>(null);
 
   const previewRef = useRef<HTMLDivElement | null>(null);
   const boardContainerRef = useRef<HTMLDivElement | null>(null);
-  const boardSlotRef = useRef<HTMLDivElement | null>(null);
+  const mainRef = useRef<HTMLDivElement | null>(null);
   const lastActivityRef = useRef<number>(0);
   const draftEmptyRef = useRef(true);
   const celebratingRef = useRef(false);
@@ -72,36 +74,49 @@ export default function Home() {
     lastActivityRef.current = Date.now();
   }, []);
 
-  // ---- 퍼즐판 슬롯(오른쪽 칸)의 가용 크기 안에서, columns:rows 비율을 유지한 채
-  // 최대한 꽉 채우는 카드 크기를 계산한다 (PuzzleBoard 내부의 contain 계산과 동일한 방식을
-  // 한 단계 바깥인 카드 자체에도 적용해, 카드와 이미지 사이에 여백이 남지 않게 한다). ----
   useEffect(() => {
-    const slotEl = boardSlotRef.current;
-    if (!slotEl) return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsWideLayout(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // ---- 데스크톱에서 퍼즐판 카드의 실제 렌더 크기를 계산한다: 행 전체 높이를 그대로 쓰고,
+  // 거기에 퍼즐 비율(columns/rows)을 곱해 폭을 정한다 (비율은 절대 바뀌지 않는다). ----
+  useEffect(() => {
+    if (!isWideLayout) return;
+    const mainEl = mainRef.current;
+    if (!mainEl) return;
     const ratio = PUZZLE_CONFIG.columns / PUZZLE_CONFIG.rows;
+    // 왼쪽 폼 패널의 최소 폭(lg:min-w-[240px])과 main 의 gap-4(16px)는 CSS 값과 맞춰둔다.
+    // 퍼즐판 폭이 "행 높이 × 비율"대로 그냥 커지면 왼쪽 패널 자리를 침범해 가로로 넘칠 수 있으므로,
+    // 그 침범분만큼은 높이를 줄여 폭을 양보한다 (비율은 항상 유지).
+    const LEFT_PANEL_MIN_WIDTH = 300;
+    const GAP = 16;
 
     const compute = () => {
-      const availW = slotEl.clientWidth;
-      const availH = slotEl.clientHeight;
-      if (availW <= 0 || availH <= 0) return;
-      let w = availW;
-      let h = w / ratio;
-      if (h > availH) {
-        h = availH;
-        w = h * ratio;
+      const availH = mainEl.clientHeight;
+      const availW = mainEl.clientWidth - LEFT_PANEL_MIN_WIDTH - GAP;
+      if (availH <= 0 || availW <= 0) return;
+      let h = availH;
+      let w = h * ratio;
+      if (w > availW) {
+        w = availW;
+        h = w / ratio;
       }
       setBoardBoxSize({ width: Math.floor(w), height: Math.floor(h) });
     };
 
     compute();
     const ro = new ResizeObserver(compute);
-    ro.observe(slotEl);
+    ro.observe(mainEl);
     window.addEventListener("resize", compute);
     return () => {
       ro.disconnect();
       window.removeEventListener("resize", compute);
     };
-  }, []);
+  }, [isWideLayout]);
 
   // ---- 최초 로드: 현재 active board 조회 ----
   useEffect(() => {
@@ -308,12 +323,13 @@ export default function Home() {
         <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{loadError}</div>
       )}
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[4fr_6fr] xl:grid-cols-[4fr_6fr]">
+      <main ref={mainRef} className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
         <section
           className={
-            screenState === "form" && introActive
+            (screenState === "form" && introActive
               ? "flex min-h-0 flex-col rounded-3xl shadow-sm"
-              : "flex min-h-0 flex-col rounded-3xl bg-violet-50 p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9"
+              : "flex min-h-0 flex-col rounded-3xl bg-violet-50 p-5 shadow-sm ring-1 ring-slate-900/5 sm:p-6") +
+            " lg:min-w-[300px] lg:flex-1"
           }
         >
           {screenState === "form" && (
@@ -354,33 +370,35 @@ export default function Home() {
           )}
         </section>
 
-        <div ref={boardSlotRef} className="relative flex min-h-0 items-center justify-center">
-          <section
-            className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5"
-            style={boardBoxSize ? { width: boardBoxSize.width, height: boardBoxSize.height } : { width: "100%", height: "100%" }}
-          >
-            <PuzzleBoard
-              containerRef={boardContainerRef}
-              participants={participants}
-              rows={PUZZLE_CONFIG.rows}
-              columns={PUZZLE_CONFIG.columns}
-              incomingIds={incomingIds}
-              pendingHiddenPosition={pendingHiddenPosition}
-              revealPosition={revealPosition}
-              revealNonce={revealNonce}
-              revealMode={revealMode}
-              onRevealComplete={handleAutoRevealComplete}
-            />
-            {celebrating && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
-                <div className="animate-pulse rounded-2xl bg-white/80 px-6 py-4 text-center shadow-lg">
-                  <p className="text-xl font-extrabold text-slate-900">48개의 조각이 하나로 이어졌어요.</p>
-                  <p className="text-base text-slate-500">함께 하나의 퍼즐을 완성했습니다.</p>
-                </div>
+        <section
+          className="relative flex w-full flex-col items-center justify-center overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5 lg:w-auto lg:shrink-0 lg:self-center"
+          style={
+            isWideLayout && boardBoxSize
+              ? { width: boardBoxSize.width, height: boardBoxSize.height }
+              : { aspectRatio: `${PUZZLE_CONFIG.columns} / ${PUZZLE_CONFIG.rows}` }
+          }
+        >
+          <PuzzleBoard
+            containerRef={boardContainerRef}
+            participants={participants}
+            rows={PUZZLE_CONFIG.rows}
+            columns={PUZZLE_CONFIG.columns}
+            incomingIds={incomingIds}
+            pendingHiddenPosition={pendingHiddenPosition}
+            revealPosition={revealPosition}
+            revealNonce={revealNonce}
+            revealMode={revealMode}
+            onRevealComplete={handleAutoRevealComplete}
+          />
+          {celebrating && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
+              <div className="animate-pulse rounded-2xl bg-white/80 px-6 py-4 text-center shadow-lg">
+                <p className="text-xl font-extrabold text-slate-900">48개의 조각이 하나로 이어졌어요.</p>
+                <p className="text-base text-slate-500">함께 하나의 퍼즐을 완성했습니다.</p>
               </div>
-            )}
-          </section>
-        </div>
+            </div>
+          )}
+        </section>
       </main>
 
       {flight && (
