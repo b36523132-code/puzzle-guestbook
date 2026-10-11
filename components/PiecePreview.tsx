@@ -29,23 +29,27 @@ const PiecePreview = forwardRef<HTMLDivElement, PiecePreviewProps>(function Piec
       <svg viewBox={STANDALONE_VIEWBOX} className="absolute inset-0 h-full w-full drop-shadow-md">
         <path d={pathD} fill={color.fill} stroke={color.stroke} strokeWidth={2} />
       </svg>
-      <div className="absolute inset-[20%] flex flex-col items-center justify-center gap-1 overflow-hidden text-center">
+      {/* 이 미리보기는 최종 확인 단계에서 아주 작은 크기(가로 64px)로도 쓰인다. 그 작은 크기에서
+          이름+한마디+이모지가 한꺼번에 들어가면 원래 글자 크기로는 안쪽 영역을 넘쳐 잘려 보일 수 있어서,
+          sm(640px) 미만에서는 안쪽 여백과 글자 크기를 더 작게 줄여 항상 잘리지 않고 들어가게 했다.
+          sm 이상(기존에 쓰이던 더 큰 미리보기)에서는 원래 크기 그대로 보인다. */}
+      <div className="absolute inset-[12%] flex flex-col items-center justify-center gap-0.5 overflow-hidden text-center sm:inset-[20%] sm:gap-1">
         <span
-          className="max-w-full truncate text-base font-bold leading-tight sm:text-lg"
+          className="max-w-full truncate text-[11px] font-bold leading-none sm:text-lg sm:leading-tight"
           style={{ color: color.text }}
         >
           {displayName}
         </span>
         {message.trim() && (
           <span
-            className="line-clamp-2 max-w-full text-[11px] font-medium leading-snug opacity-90 sm:text-xs"
+            className="line-clamp-1 max-w-full text-[8px] font-medium leading-none opacity-90 sm:line-clamp-2 sm:text-xs sm:leading-snug"
             style={{ color: color.text }}
           >
             {message.trim()}
           </span>
         )}
         {emojis.length > 0 && (
-          <span className="mt-0.5 text-lg leading-none sm:text-xl">{emojis.join(" ")}</span>
+          <span className="mt-0.5 text-[10px] leading-none sm:text-xl">{emojis.join(" ")}</span>
         )}
       </div>
     </div>
