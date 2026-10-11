@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DEFAULT_COLOR_VARIANT, type ColorVariantId } from "@/config/colors";
 import { MAX_EMOJIS_PER_PIECE, MAX_MESSAGE_LENGTH, MAX_NAME_LENGTH } from "@/config/puzzle";
 import { assignEmojiPositions } from "@/lib/emoji";
@@ -196,6 +196,15 @@ export default function ParticipantForm({
         )}
       </div>
 
+      {step === LAST_STEP && !isSubmitting && (
+        <div className="flex shrink-0 justify-center">
+          <div className="bubble-bounce relative rounded-xl bg-slate-900 px-3 py-1.5 text-center text-xs font-semibold leading-snug text-white shadow-lg sm:text-sm">
+            아래 버튼을 눌러 완성된 조각을 퍼즐판에 이어주세요.
+            <span className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-8 border-t-8 border-x-transparent border-t-slate-900" />
+          </div>
+        </div>
+      )}
+
       <div className="flex shrink-0 gap-3">
         {step > 0 && (
           <button
@@ -220,7 +229,9 @@ export default function ParticipantForm({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="h-16 flex-1 rounded-2xl bg-slate-900 text-xl font-bold text-white transition-transform active:scale-[0.98] disabled:bg-slate-300"
+            className={`h-16 flex-1 rounded-2xl bg-slate-900 text-xl font-bold text-white transition-transform active:scale-[0.98] disabled:bg-slate-300 ${
+              isSubmitting ? "" : "cta-glow"
+            }`}
           >
             {isSubmitting ? "조각을 잇는 중..." : "퍼즐판에 조각 잇기"}
           </button>
@@ -276,77 +287,117 @@ function IntroScreen({
 }) {
   const [page, setPage] = useState(0);
   const remaining = Math.max(totalPieces - filledCount, 0);
+  const touchStartXRef = useRef<number | null>(null);
 
   function goNextPage() {
     onPageChange();
     setPage((p) => Math.min(p + 1, INTRO_PAGE_COUNT - 1));
   }
 
+  function goPrevPage() {
+    onPageChange();
+    setPage((p) => Math.max(p - 1, 0));
+  }
+
+  // 스토리(1) / 방법 안내(2) 두 페이지는 버튼뿐 아니라 손가락 스와이프로도 넘길 수 있게 한다.
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartXRef.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    const startX = touchStartXRef.current;
+    touchStartXRef.current = null;
+    if (startX === null) return;
+    const deltaX = e.changedTouches[0].clientX - startX;
+    const SWIPE_THRESHOLD = 40;
+    if (Math.abs(deltaX) < SWIPE_THRESHOLD) return;
+    if (deltaX < 0) {
+      if (page < INTRO_PAGE_COUNT - 1) goNextPage();
+    } else if (page > 0) {
+      goPrevPage();
+    }
+  }
+
   return (
     <div className="flex h-full flex-col justify-between gap-6 rounded-3xl bg-gradient-to-b from-violet-600 to-violet-800 p-6 text-white sm:p-8">
       <IntroHeader />
 
-      {page === 0 && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-          <div className="w-full rounded-2xl border border-white/25 px-6 py-9">
-            <p className="text-lg font-semibold text-white/70 sm:text-xl">남은 조각</p>
-            <p className="mt-2 flex items-baseline justify-center gap-2 font-extrabold text-amber-200">
-              <span className="text-8xl sm:text-9xl">{remaining}</span>
-              <span className="text-4xl sm:text-5xl">개</span>
+      <div
+        className="flex min-h-0 flex-1 flex-col touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {page === 0 && (
+          <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+            <div className="w-full rounded-2xl border border-white/25 px-6 py-9">
+              <p className="text-lg font-semibold text-white/70 sm:text-xl">남은 조각</p>
+              <p className="mt-2 flex items-baseline justify-center gap-2 font-extrabold text-amber-200">
+                <span className="text-8xl sm:text-9xl">{remaining}</span>
+                <span className="text-4xl sm:text-5xl">개</span>
+              </p>
+            </div>
+            <h2 className="text-3xl font-extrabold leading-tight sm:text-4xl">남은 빈자리를 채워줄 당신이 필요해요!</h2>
+            <p className="text-base text-white/60 sm:text-lg">
+              ⓘ 본 프로그램은
+              <br />
+              실제 봉사 신청 없이
+              <br />
+              참여할 수 있는
+              <br />
+              가상 릴레이 봉사 체험입니다.
             </p>
           </div>
-          <h2 className="text-3xl font-extrabold leading-tight sm:text-4xl">남은 빈자리를 채워줄 당신이 필요해요!</h2>
-          <p className="text-base text-white/60 sm:text-lg">
-            ⓘ 본 프로그램은 실제 봉사 신청 없이 참여할 수 있는 가상 릴레이 봉사 체험입니다.
-          </p>
-        </div>
-      )}
+        )}
 
-      {page === 1 && (
-        <div className="flex flex-1 flex-col justify-center gap-8">
-          <p className="text-xl font-bold leading-relaxed sm:text-2xl">
-            반짝이는 바다와 아름다운 풍경으로 가득한 광안리,
-            <br />
-            하지만 해변 곳곳에는 누군가의 손길이
-            <br />
-            필요한 쓰레기가 남아있어요.
-            <br />
-            <br />
-            이제 가상 환경정화 릴레이에서 당신의
-            <br />
-            조각을 더해, 광안리의 변화를 함께 완성해볼까요?
-          </p>
-          <p className="text-3xl font-extrabold leading-snug text-amber-200 sm:text-4xl">
-            깨끗한 광안리를 완성할
-            <br />
-            다음 주인공이 되어주세요!
-          </p>
-          <IntroDots total={INTRO_PAGE_COUNT - 1} current={page - 1} />
-        </div>
-      )}
-
-      {page === 2 && (
-        <div className="flex flex-1 flex-col justify-center gap-6">
-          <h2 className="text-center text-3xl font-extrabold sm:text-4xl">방법은 간단해요!</h2>
-          <div className="flex flex-col gap-3">
-            {INTRO_STEPS.map(({ no, title, desc }, i) => (
-              <div
-                key={no}
-                className="flex items-center gap-4 rounded-2xl bg-white/10 px-5 py-4 text-white shadow-lg ring-1 ring-white/15 backdrop-blur-sm sm:px-6 sm:py-5"
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-xl font-extrabold text-white sm:h-14 sm:w-14 sm:text-2xl">
-                  {i + 1}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-lg font-extrabold sm:text-2xl">{title}</p>
-                  <p className="mt-0.5 text-base font-medium text-white/70 sm:text-lg">{desc}</p>
-                </div>
-              </div>
-            ))}
+        {page === 1 && (
+          <div className="flex flex-1 flex-col justify-center gap-8">
+            <p className="text-xl font-bold leading-relaxed sm:text-2xl">
+              반짝이는 바다와
+              <br />
+              아름다운 풍경으로
+              <br />
+              가득한 광안리,
+              <br />
+              하지만 해변 곳곳에는
+              <br />
+              누군가의 손길이
+              <br />
+              필요한 쓰레기가
+              <br />
+              남아있어요.
+            </p>
+            <p className="text-3xl font-extrabold leading-snug text-amber-200 sm:text-4xl">
+              깨끗한 광안리를 완성할
+              <br />
+              다음 주인공이 되어주세요!
+            </p>
+            <IntroDots total={INTRO_PAGE_COUNT - 1} current={page - 1} />
           </div>
-          <IntroDots total={INTRO_PAGE_COUNT - 1} current={page - 1} />
-        </div>
-      )}
+        )}
+
+        {page === 2 && (
+          <div className="flex flex-1 flex-col justify-center gap-6">
+            <h2 className="text-center text-3xl font-extrabold sm:text-4xl">방법은 간단해요!</h2>
+            <div className="flex flex-col gap-3">
+              {INTRO_STEPS.map(({ no, title, desc }, i) => (
+                <div
+                  key={no}
+                  className="flex items-center gap-4 rounded-2xl bg-white/10 px-5 py-4 text-white shadow-lg ring-1 ring-white/15 backdrop-blur-sm sm:px-6 sm:py-5"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-xl font-extrabold text-white sm:h-14 sm:w-14 sm:text-2xl">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-lg font-extrabold sm:text-2xl">{title}</p>
+                    <p className="mt-0.5 text-base font-medium text-white/70 sm:text-lg">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <IntroDots total={INTRO_PAGE_COUNT - 1} current={page - 1} />
+          </div>
+        )}
+      </div>
 
       <button
         type="button"
@@ -416,7 +467,13 @@ function StepMessage({
     <div className="flex h-full flex-col justify-center gap-4">
       <div>
         <h2 className="text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">한마디 남겨주세요</h2>
-        <p className="mt-2 text-base text-slate-500 sm:text-lg">다음 사람에게 전하고 싶은 짧은 메시지를 적어보세요. 비워두고 넘어가도 괜찮아요.</p>
+        <p className="mt-2 text-base text-slate-500 sm:text-lg">
+          다음 사람에게 전하고
+          <br />
+          싶은 짧은 메시지를 적어보세요.
+          <br />
+          비워두고 넘어가도 괜찮아요.
+        </p>
       </div>
       <textarea
         value={message}
@@ -490,14 +547,14 @@ function StepReview({
   errorMessage: string | null;
 }) {
   return (
-    <div className="flex h-full flex-col items-center gap-3 overflow-y-auto text-center sm:gap-5">
+    <div className="flex h-full flex-col items-center justify-center gap-2 overflow-y-auto text-center sm:gap-3">
       <div>
-        <h2 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
+        <h2 className="text-lg font-extrabold leading-tight text-slate-900 sm:text-2xl">
           모든 단계를 완료하고
           <br />
           나만의 조각을 완성했어요!
         </h2>
-        <p className="mt-2 text-sm text-slate-500 sm:text-lg">당신이 완성한 조각을 확인해 보세요.</p>
+        <p className="mt-1 text-xs text-slate-500 sm:text-base">당신이 완성한 조각을 확인해 보세요.</p>
       </div>
 
       <PiecePreview
@@ -506,22 +563,19 @@ function StepReview({
         message={message}
         colorVariant={colorVariant}
         emojis={emojis}
-        className="max-w-[160px] sm:max-w-[220px]"
+        className="max-w-[100px] sm:max-w-[160px]"
       />
 
-      <div className="w-full rounded-2xl bg-violet-50 px-4 py-3 text-left sm:px-6 sm:py-6">
-        <p className="text-base font-extrabold text-violet-700 sm:text-xl">작은 실천이 모여 깨끗한 광안리로!</p>
-        <p className="mt-1 text-sm leading-snug text-slate-600 sm:mt-2 sm:text-lg sm:leading-relaxed">
-          해변의 쓰레기 하나를 줍는 작은 실천처럼, 한 사람의 봉사가 다음 사람에게 이어질 때 더 큰 변화를 만들 수 있어요.
-        </p>
-        <p className="mt-1 text-sm leading-snug text-slate-600 sm:mt-2 sm:text-lg sm:leading-relaxed">
-          이제 가상 체험으로 완성한 당신의 조각을 광안리 환경정화 퍼즐에 더해보세요.
+      <div className="w-full rounded-2xl bg-violet-50 px-4 py-2 text-left sm:px-6 sm:py-3">
+        <p className="text-sm font-extrabold text-violet-700 sm:text-lg">작은 실천이 모여 깨끗한 광안리로!</p>
+        <p className="mt-0.5 text-xs leading-snug text-slate-600 sm:mt-1 sm:text-base sm:leading-relaxed">
+          해변의 쓰레기 하나를 줍는 작은 실천처럼,
+          <br />
+          한 사람의 봉사가 다음 사람에게 이어질 때
+          <br />
+          더 큰 변화를 만들 수 있어요.
         </p>
       </div>
-
-      <p className="text-base font-extrabold leading-snug text-slate-900 sm:text-2xl">
-        아래 버튼을 눌러 완성된 조각을 퍼즐판에 이어주세요.
-      </p>
 
       {errorMessage && (
         <p role="alert" className="rounded-lg bg-rose-50 px-4 py-3 text-base font-medium text-rose-600">
