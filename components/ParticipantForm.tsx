@@ -351,8 +351,8 @@ function IntroScreen({
         )}
 
         {page === 1 && (
-          <div className="flex flex-1 flex-col justify-start gap-4 sm:justify-center sm:gap-6">
-            <p className="text-base font-bold leading-relaxed sm:text-lg lg:text-xl">
+          <div className="flex flex-1 flex-col justify-start gap-2 sm:justify-center sm:gap-6">
+            <p className="text-lg font-bold leading-snug sm:text-xl sm:leading-relaxed lg:text-2xl">
               반짝이는 바다와 아름다운
               <br />
               풍경으로 가득한 광안리,
@@ -361,7 +361,7 @@ function IntroScreen({
               <br />
               손길이 필요한 쓰레기가 남아있어요.
             </p>
-            <p className="text-xl font-extrabold leading-snug text-amber-200 sm:text-2xl lg:text-3xl">
+            <p className="text-2xl font-extrabold leading-tight text-amber-200 sm:text-3xl sm:leading-snug lg:text-4xl">
               깨끗한 광안리를 완성할
               <br />
               다음 주인공이 되어주세요!
@@ -547,12 +547,17 @@ function StepReview({
   errorMessage: string | null;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col items-center justify-center gap-0.5 overflow-hidden text-center sm:gap-3">
+    <div className="flex h-full min-h-0 flex-col items-center justify-start gap-0.5 overflow-hidden text-center sm:justify-center sm:gap-3">
       <div>
         <h2 className="text-sm font-extrabold leading-tight text-slate-900 sm:text-2xl lg:text-3xl">
-          모든 단계를 완료하고
-          <br />
-          나만의 조각을 완성했어요!
+          {/* 작은 화면에서는 한 줄로도 충분히 뜻이 통하는 더 짧은 문구를 써서, 글자가 영역을
+              넘쳐 잘리는 일이 없도록 여유를 더 둔다. sm 이상에서는 기존 두 줄 문구 그대로. */}
+          <span className="sm:hidden">조각이 완성됐어요!</span>
+          <span className="hidden sm:inline">
+            모든 단계를 완료하고
+            <br />
+            나만의 조각을 완성했어요!
+          </span>
         </h2>
         <p className="mt-1 hidden text-sm text-slate-500 sm:block sm:text-base lg:text-lg">
           당신이 완성한 조각을 확인해 보세요.
