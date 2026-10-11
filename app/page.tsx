@@ -56,6 +56,7 @@ export default function Home() {
   const [completedBoards, setCompletedBoards] = useState<Board[]>([]);
   const [formKey, setFormKey] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [introActive, setIntroActive] = useState(true);
 
   const previewRef = useRef<HTMLDivElement | null>(null);
   const boardContainerRef = useRef<HTMLDivElement | null>(null);
@@ -288,19 +289,28 @@ export default function Home() {
         <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{loadError}</div>
       )}
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[4fr_6fr] xl:grid-cols-[4fr_6fr]">
-        <section className="flex min-h-0 flex-col rounded-3xl bg-violet-50 p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9">
+      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-2">
+        <section
+          className={
+            screenState === "form" && introActive
+              ? "flex min-h-0 flex-col rounded-3xl shadow-sm"
+              : "flex min-h-0 flex-col rounded-3xl bg-violet-50 p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-9"
+          }
+        >
           {screenState === "form" && (
             <ParticipantForm
               key={formKey}
               previewRef={previewRef}
               submitStatus={submitStatus}
               errorMessage={errorMessage}
+              totalPieces={activeBoard?.totalPieces ?? 0}
+              filledCount={participants.length}
               onSubmit={handleSubmitDraft}
               onActivity={markActivity}
               onDraftEmptyChange={(empty) => {
                 draftEmptyRef.current = empty;
               }}
+              onIntroActiveChange={setIntroActive}
             />
           )}
 
