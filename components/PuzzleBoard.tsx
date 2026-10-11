@@ -77,19 +77,16 @@ export default function PuzzleBoard({
   useEffect(() => {
     const wrapperEl = wrapperRef.current;
     if (!wrapperEl) return;
-    const ratio = columns / rows;
 
+    // 퍼즐판이 여백 없이 패널을 꽉 채우도록, 비율을 유지한 채 끼워 맞추는 대신
+    // 가로/세로 각각 사용 가능한 공간을 그대로 채운다 (SVG 는 preserveAspectRatio="none" 이고
+    // 조각 좌표도 가로/세로를 독립적으로 스케일하므로, 정확한 columns:rows 비율이 아니어도
+    // 레이어끼리의 정렬은 그대로 유지된다).
     const compute = () => {
       const availW = wrapperEl.clientWidth;
       const availH = wrapperEl.clientHeight;
       if (availW <= 0 || availH <= 0) return;
-      let w = availW;
-      let h = w / ratio;
-      if (h > availH) {
-        h = availH;
-        w = h * ratio;
-      }
-      setSize({ width: Math.floor(w), height: Math.floor(h) });
+      setSize({ width: Math.floor(availW), height: Math.floor(availH) });
     };
 
     compute();
