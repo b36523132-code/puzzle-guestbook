@@ -37,7 +37,7 @@ export default function StepIndicator({ steps, currentStep, maxReachedStep, onSt
           );
         })}
       </div>
-      <p className="mt-2 text-sm font-semibold text-violet-500 sm:text-base">
+      <p className="mt-2 text-base font-semibold text-violet-500 sm:text-lg">
         STEP {currentStep + 1}/{steps.length} · {steps[currentStep]}
       </p>
     </div>
