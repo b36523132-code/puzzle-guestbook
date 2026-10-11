@@ -273,7 +273,7 @@ export default function Home() {
         <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">{loadError}</div>
       )}
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-2">
+      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[4fr_6fr] xl:grid-cols-[4fr_6fr]">
         <section
           className={
             screenState === "form" && introActive
