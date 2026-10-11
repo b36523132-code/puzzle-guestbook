@@ -4,8 +4,8 @@
  * rows * columns === totalPieces 를 반드시 유지해야 한다.
  */
 export const PUZZLE_CONFIG = {
-  rows: 8,
-  columns: 6,
+  rows: 6,
+  columns: 8,
   totalPieces: 48,
   /** 퍼즐판 제목. 화면 상단과 완료 메시지 등에서 공통으로 사용한다. */
   title: "광안리 해수욕장 환경정화",
