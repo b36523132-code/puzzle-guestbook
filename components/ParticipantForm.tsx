@@ -554,14 +554,16 @@ function StepReview({
     // sm~lg 사이의 태블릿 폭까지)은 전부 퍼즐판과 세로로 쌓이는 레이아웃이라 세로 공간이
     // 빠듯하므로, 글자/여백을 키우는 기준을 sm 대신 lg 로 맞춰서 그 구간에서 글자가
     // 영역을 넘쳐 잘리는 일이 없게 한다.
-    // lg 이상에서는 실측 결과 세로 공간이 넉넉히 남으므로(1024x768 기준으로도 여유가 있음),
-    // justify-between 으로 세 블록(제목/미리보기/안내문구) 사이 간격을 남는 공간만큼
-    // 자동으로 벌려 화면을 꽉 채운다 - 글자 크기를 고정값으로 무리하게 키우는 대신 "남는
-    // 공간을 간격으로 분배"하는 방식이라, 화면 크기가 달라져도 넘치거나 잘릴 위험이 없다.
-    // (justify-between은 기존 요소 높이의 합이 변하지 않는 한 넘침을 유발하지 않는다.)
-    <div className="flex h-full min-h-0 flex-col items-center justify-start gap-0.5 overflow-hidden text-center lg:justify-between lg:gap-2">
+    // (이전에는 justify-between 으로 남는 세로 공간을 전부 간격에 쏟아부었는데, 그러다 보니
+    // 퍼즐 미리보기와 안내문구 사이 간격이 과하게 벌어져 보였다. 대신 justify-center + 고정
+    // gap-3 로 바꾸고, 그만큼 확보된 여유를 간격이 아니라 글자 크기(제목 lg:text-2xl, 보조
+    // 문구/안내문구 한 단계씩 확대)와 미리보기 크기(140px -> 170px)에 썼다. 1024x768(가장
+    // 빠듯한 lg 케이스)에서 실측한 사용 가능 높이(426px) 대비 새 콘텐츠 합(~370px)이 여전히
+    // 여유가 있어 넘치거나 잘리지 않는다 - 더 넓은 화면(1440x900, 1920x1080)은 여유가 더
+    // 많으므로 당연히 안전하다.
+    <div className="flex h-full min-h-0 flex-col items-center justify-start gap-0.5 overflow-hidden text-center lg:justify-center lg:gap-3">
       <div>
-        <h2 className="text-sm font-extrabold leading-tight text-slate-900 lg:text-xl">
+        <h2 className="text-sm font-extrabold leading-tight text-slate-900 lg:text-2xl">
           <span className="lg:hidden">조각이 완성됐어요!</span>
           <span className="hidden lg:inline">
             모든 단계를 완료하고
@@ -569,7 +571,7 @@ function StepReview({
             나만의 조각을 완성했어요!
           </span>
         </h2>
-        <p className="mt-1 hidden text-sm text-slate-500 lg:block lg:text-sm">
+        <p className="mt-1 hidden text-sm text-slate-500 lg:block lg:text-base">
           당신이 완성한 조각을 확인해 보세요.
         </p>
       </div>
@@ -580,15 +582,15 @@ function StepReview({
         message={message}
         colorVariant={colorVariant}
         emojis={emojis}
-        className="max-w-[64px] lg:max-w-[140px]"
+        className="max-w-[64px] lg:max-w-[170px]"
       />
 
       {/* 안내 문장은 빼지 않고 lg(1024px) 이상에서는 항상 보여준다. 실측 결과 남는 세로
           공간이 충분해, 1024x768처럼 낮은 화면에서도 글자를 키운 채로 전체 내용이 넘치지
           않고 들어간다. */}
-      <div className="hidden w-full rounded-2xl bg-violet-50 px-4 py-2.5 text-left lg:block">
-        <p className="text-sm font-extrabold text-violet-700">작은 실천이 모여 깨끗한 광안리로!</p>
-        <p className="mt-0.5 text-xs leading-snug text-slate-600">
+      <div className="hidden w-full rounded-2xl bg-violet-50 px-5 py-3 text-left lg:block">
+        <p className="text-base font-extrabold text-violet-700">작은 실천이 모여 깨끗한 광안리로!</p>
+        <p className="mt-1 text-sm leading-snug text-slate-600">
           해변의 쓰레기 하나를 줍는 작은 실천처럼, 한 사람의 봉사가 다음 사람에게 이어질 때 더 큰 변화를 만들 수 있어요.
         </p>
       </div>
