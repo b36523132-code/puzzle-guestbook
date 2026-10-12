@@ -320,34 +320,44 @@ export default function Home() {
         </section>
 
         <section
-          // 퍼즐판이 세로로 긴 배열(6x8)로 바뀌면서, 폭 기준 비율(aspectRatio)에 그대로
-          // 맡기면 모바일/태블릿의 세로 쌓임 레이아웃에서 퍼즐판 높이가 지나치게 커져
-          // 위의 입력 패널을 밀어내거나 화면 아래로 잘릴 수 있다. 그래서 lg: 미만에서는
-          // 뷰포트 높이에 비례한 고정 높이(h-[38vh])로 안전하게 제한하고, 그 안에서
-          // PuzzleBoard 내부의 contain 계산이 비율을 유지한 채 꽉 차게(letterbox만 생기고
-          // 잘리지 않게) 그린다. lg: 이상에서는 기존처럼 영역 전체 높이를 그대로 쓴다.
-          className="relative h-[38vh] min-h-[220px] w-full overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5 lg:h-full"
+          // 퍼즐판 영역(오른쪽 창)을 세로로 두 블록으로 나눈다: (1) 아주 짧은 "퍼즐판 현황"
+          // 바 + (2) 그 아래 실제 퍼즐판. lg: 미만(세로 쌓임 레이아웃)에서는, 가로로 넓은
+          // 8x6 배열을 "폭 기준 비율"에 그대로 맡기면 (특히 세로로 긴 태블릿 화면에서) 전체
+          // 높이가 위 입력 패널까지 밀어내거나 짓눌러 잘리게 만들 수 있다 - 그래서 여기서는
+          // 뷰포트 높이에 비례한 안전한 높이(h-[42vh])로 "현황 바 + 퍼즐판"을 함께 제한하고,
+          // 그 안에서 PuzzleBoard 내부의 contain 계산이 폭 기준으로 꽉 차게(남는 여백은 위/
+          // 아래로만, 잘리는 조각 없이) 그린다. lg: 이상에서는 영역 전체 높이를 그대로 쓴다.
+          className="relative flex h-[42vh] min-h-[240px] w-full flex-col overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5 lg:h-full"
         >
-          <PuzzleBoard
-            containerRef={boardContainerRef}
-            participants={participants}
-            rows={PUZZLE_CONFIG.rows}
-            columns={PUZZLE_CONFIG.columns}
-            incomingIds={incomingIds}
-            pendingHiddenPosition={pendingHiddenPosition}
-            revealPosition={revealPosition}
-            revealNonce={revealNonce}
-            revealMode={revealMode}
-            onRevealComplete={handleAutoRevealComplete}
-          />
-          {celebrating && (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
-              <div className="animate-pulse rounded-2xl bg-white/80 px-6 py-4 text-center shadow-lg">
-                <p className="text-xl font-extrabold text-slate-900">48개의 조각이 하나로 이어졌어요.</p>
-                <p className="text-base text-slate-500">함께 하나의 퍼즐을 완성했습니다.</p>
+          <div className="flex shrink-0 items-center justify-between gap-2 bg-violet-50 px-4 py-2 sm:px-5">
+            <span className="text-xs font-bold tracking-wide text-violet-700 sm:text-sm">퍼즐판 현황</span>
+            <span className="text-sm font-extrabold text-violet-700 sm:text-base">
+              {participants.length}/{activeBoard?.totalPieces ?? PUZZLE_CONFIG.totalPieces}
+            </span>
+          </div>
+
+          <div className="relative min-h-0 w-full flex-1">
+            <PuzzleBoard
+              containerRef={boardContainerRef}
+              participants={participants}
+              rows={PUZZLE_CONFIG.rows}
+              columns={PUZZLE_CONFIG.columns}
+              incomingIds={incomingIds}
+              pendingHiddenPosition={pendingHiddenPosition}
+              revealPosition={revealPosition}
+              revealNonce={revealNonce}
+              revealMode={revealMode}
+              onRevealComplete={handleAutoRevealComplete}
+            />
+            {celebrating && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px]">
+                <div className="animate-pulse rounded-2xl bg-white/80 px-6 py-4 text-center shadow-lg">
+                  <p className="text-xl font-extrabold text-slate-900">48개의 조각이 하나로 이어졌어요.</p>
+                  <p className="text-base text-slate-500">함께 하나의 퍼즐을 완성했습니다.</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </section>
       </main>
 
