@@ -65,6 +65,25 @@ button {
   animation: bubble-bounce 1.6s ease-in-out infinite;
 }
 
+/* "방법은 간단해요!" 안내 3단계가 순서대로(각 줄의 style={animationDelay}로 간격을 둠)
+   살짝 아래에서 위로 떠오르며 나타나는 효과. opacity/transform만 바뀌고 레이아웃 공간은
+   처음부터 차지하므로(both: 지연 구간에도 시작 상태 유지) 다른 요소를 밀어내거나
+   페이지 영역을 벗어나게 하지 않는다. */
+@keyframes intro-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.intro-step-in {
+  animation: intro-step-in 0.5s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
