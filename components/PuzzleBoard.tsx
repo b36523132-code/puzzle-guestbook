@@ -43,10 +43,10 @@ interface PuzzleBoardProps {
  * 퍼즐판은 항상 columns:rows 비율을 "정확히" 유지해야 한다 (SVG 안의 이미지/조각 경계와
  * HTML 오버레이 카드가 1px 오차 없이 겹쳐야 하기 때문) — 그래야 이미지나 조각 모양이
  * 눌리거나 늘어나 보이지 않는다.
- * 그와 동시에 부모 영역(카드)을 위아래·양옆 어디에도 여백 없이 꽉 채워야 하므로, 비율은
- * 그대로 둔 채 부모 영역을 "덮는"(cover) 방식으로 픽셀 크기를 계산한다: 필요하면 퍼즐판 자체를
- * 부모보다 조금 크게 그린 뒤, 부모의 overflow-hidden 으로 넘치는 부분만 살짝 잘라낸다
- * (이미지가 비율대로 들어가고 가장자리만 잘리는 것이지, 찌그러지는 것이 아니다).
+ * 또한 48개 조각이 하나도 잘리지 않고 전부 보여야 하므로, 비율은 그대로 둔 채 부모 영역
+ * 안에 "완전히 들어오는"(contain) 방식으로 픽셀 크기를 계산한다: 부모보다 커지지 않도록
+ * 항상 작거나 같게 그리고, 남는 여백(있다면)은 부모의 items-center/justify-center 로
+ * 가운데 정렬한다 (이미지가 비율대로 들어가고 가장자리가 잘리는 일이 없다).
  *
  * 레이어 구성 (아래 -> 위):
  *  1) SVG 이미지 레이어 - 모든 칸에 하나의 공동 이미지를 조각 모양대로 잘라 보여준다. 항상 보인다.
@@ -84,21 +84,21 @@ export default function PuzzleBoard({
     if (!wrapperEl) return;
     const ratio = columns / rows;
 
-    // 이미지/조각이 찌그러지지 않도록 columns:rows 비율은 "정확히" 유지한 채, 부모 영역을
-    // 빈틈없이 덮도록(cover) 크기를 계산한다. 폭 기준으로 맞췄을 때 세로가 부모보다 작게
-    // 남으면, 세로 기준으로 다시 맞춰 가로가 부모보다 커지도록 한다 (그 초과분은 바깥
-    // wrapper 의 overflow-hidden 이 잘라낸다) — 반대로 세로 기준이 이미 꽉 채운다면 그대로 둔다.
+    // 이미지는 그대로, columns:rows 비율은 "정확히" 유지한 채, 48개 조각이 하나도 잘리지
+    // 않고 부모 영역 안에 전부 들어오도록(contain) 크기를 계산한다. 폭 기준으로 맞췄을 때
+    // 세로가 부모보다 커지면, 세로 기준으로 다시 맞춰 가로가 줄어들도록 한다 (남는 여백은
+    // 바깥 wrapper 의 justify-center/items-center 로 가운데 정렬되며, 잘리는 조각은 없다).
     const compute = () => {
       const availW = wrapperEl.clientWidth;
       const availH = wrapperEl.clientHeight;
       if (availW <= 0 || availH <= 0) return;
       let w = availW;
       let h = w / ratio;
-      if (h < availH) {
+      if (h > availH) {
         h = availH;
         w = h * ratio;
       }
-      setSize({ width: Math.ceil(w), height: Math.ceil(h) });
+      setSize({ width: Math.floor(w), height: Math.floor(h) });
     };
 
     compute();
