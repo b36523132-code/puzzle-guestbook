@@ -332,6 +332,23 @@ function IntroScreen({
       >
         {page === 0 && (
           <div className="flex flex-1 flex-col items-center justify-start gap-4 text-center sm:justify-center sm:gap-6">
+            {/* 전체 조각 수와 맞춰진(참여 완료된) 조각 수를 "남은 조각"과 같은 글자 크기로
+                함께 보여준다. "남은 조각" 카드는 요청대로 그대로 유지하고, 그 위에 같은
+                스타일의 카드 두 개를 추가했다. */}
+            <div className="w-full rounded-2xl border border-white/25 px-4 py-6 sm:py-8">
+              <p className="text-lg font-semibold text-white/70 sm:text-xl">전체 조각</p>
+              <p className="mt-2 flex items-baseline justify-center gap-2 font-extrabold text-amber-200">
+                <span className="text-7xl sm:text-8xl lg:text-9xl">{totalPieces}</span>
+                <span className="text-3xl sm:text-4xl lg:text-5xl">개</span>
+              </p>
+            </div>
+            <div className="w-full rounded-2xl border border-white/25 px-4 py-6 sm:py-8">
+              <p className="text-lg font-semibold text-white/70 sm:text-xl">맞춰진 조각</p>
+              <p className="mt-2 flex items-baseline justify-center gap-2 font-extrabold text-amber-200">
+                <span className="text-7xl sm:text-8xl lg:text-9xl">{filledCount}</span>
+                <span className="text-3xl sm:text-4xl lg:text-5xl">개</span>
+              </p>
+            </div>
             <div className="w-full rounded-2xl border border-white/25 px-4 py-6 sm:py-8">
               <p className="text-lg font-semibold text-white/70 sm:text-xl">남은 조각</p>
               <p className="mt-2 flex items-baseline justify-center gap-2 font-extrabold text-amber-200">
@@ -547,19 +564,25 @@ function StepReview({
   errorMessage: string | null;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col items-center justify-start gap-0.5 overflow-hidden text-center sm:justify-center sm:gap-3">
+    // 이 화면(그리고 안의 PiecePreview)이 "넓게" 보이는 lg:(1024px) 이상에서만 실제로
+    // 퍼즐판과 좌우로 나란히 배치되어 세로 공간이 넉넉해진다. 그보다 좁은 화면(모바일은 물론
+    // sm~lg 사이의 태블릿 폭까지)은 전부 퍼즐판과 세로로 쌓이는 레이아웃이라 세로 공간이
+    // 빠듯하므로, 글자/여백을 키우는 기준을 sm 대신 lg 로 맞춰서 그 구간에서 글자가
+    // 영역을 넘쳐 잘리는 일이 없게 한다.
+    // justify-center는 넘칠 때 위/아래 양쪽을 동시에 잘라서(특히 1024x768처럼 넓지만
+    // 낮은 화면에서) 제목 윗부분이 통째로 안 보이는 문제를 일으키므로, 모든 구간에서
+    // justify-start를 유지해 넘치는 경우에도 항상 아래쪽만 잘리게 한다.
+    <div className="flex h-full min-h-0 flex-col items-center justify-start gap-0.5 overflow-hidden text-center lg:gap-3">
       <div>
-        <h2 className="text-sm font-extrabold leading-tight text-slate-900 sm:text-2xl lg:text-3xl">
-          {/* 작은 화면에서는 한 줄로도 충분히 뜻이 통하는 더 짧은 문구를 써서, 글자가 영역을
-              넘쳐 잘리는 일이 없도록 여유를 더 둔다. sm 이상에서는 기존 두 줄 문구 그대로. */}
-          <span className="sm:hidden">조각이 완성됐어요!</span>
-          <span className="hidden sm:inline">
+        <h2 className="text-sm font-extrabold leading-tight text-slate-900 lg:text-3xl">
+          <span className="lg:hidden">조각이 완성됐어요!</span>
+          <span className="hidden lg:inline">
             모든 단계를 완료하고
             <br />
             나만의 조각을 완성했어요!
           </span>
         </h2>
-        <p className="mt-1 hidden text-sm text-slate-500 sm:block sm:text-base lg:text-lg">
+        <p className="mt-1 hidden text-sm text-slate-500 lg:block lg:text-lg">
           당신이 완성한 조각을 확인해 보세요.
         </p>
       </div>
@@ -570,14 +593,16 @@ function StepReview({
         message={message}
         colorVariant={colorVariant}
         emojis={emojis}
-        className="max-w-[64px] sm:max-w-[150px] lg:max-w-[180px]"
+        className="max-w-[64px] lg:max-w-[130px]"
       />
 
-      {/* 작은 화면(세로폭이 짧은 폰)에서는 이 안내 카드까지 다 넣으면 스크롤이 필요해지므로
-          숨기고, 조각 미리보기(핵심 확인 대상)가 항상 스크롤 없이 한 화면에 들어오게 한다. */}
-      <div className="hidden w-full rounded-2xl bg-violet-50 px-4 py-2 text-left sm:block sm:px-5 sm:py-4">
-        <p className="text-base font-extrabold text-violet-700 lg:text-lg">작은 실천이 모여 깨끗한 광안리로!</p>
-        <p className="mt-0.5 text-sm leading-snug text-slate-600 lg:text-base">
+      {/* 세로 공간이 빠듯한 화면(모바일~태블릿 폭은 물론, 가로는 넓지만 높이가 낮은
+          1024x768 같은 화면까지)에서는 이 안내 카드까지 다 넣으면 넘치므로 숨기고,
+          조각 미리보기(핵심 확인 대상)가 항상 잘리지 않고 한 화면에 들어오게 한다.
+          너비(lg)뿐 아니라 높이도 충분할 때만(min-height: 820px) 보여준다. */}
+      <div className="hidden w-full rounded-2xl bg-violet-50 px-4 py-2 text-left [@media(min-width:1024px)_and_(min-height:820px)]:block">
+        <p className="text-base font-extrabold text-violet-700">작은 실천이 모여 깨끗한 광안리로!</p>
+        <p className="mt-0.5 text-sm leading-snug text-slate-600">
           해변의 쓰레기 하나를 줍는 작은 실천처럼, 한 사람의 봉사가 다음 사람에게 이어질 때 더 큰 변화를 만들 수 있어요.
         </p>
       </div>
