@@ -374,20 +374,22 @@ function IntroScreen({
         )}
 
         {page === 2 && (
-          <div className="flex flex-1 flex-col justify-start gap-3 sm:justify-center sm:gap-4">
+          <div className="flex flex-1 flex-col justify-start gap-2 sm:justify-center sm:gap-3">
             <h2 className="text-center text-2xl font-extrabold sm:text-3xl">방법은 간단해요!</h2>
             {/* 버튼(채워진 박스+그림자+테두리)처럼 보이지 않도록 배경/그림자/테두리를 모두
                 빼고, 숫자는 채워진 원이 아니라 얇은 테두리 원으로, 각 단계는 구분선 하나로만
-                나눈 "타임라인" 형태로 바꿨다. 높이는 기존 박스형(py-3/py-4)과 거의 같게
-                유지해서 넘치지 않는다. 각 줄은 intro-step-in 애니메이션(globals.css)으로
-                살짝 아래에서 위로 올라오며 순서대로(80ms씩 지연) 나타난다 - 레이아웃 공간은
-                처음부터 차지하고 있고 opacity/transform만 바뀌므로 페이지 안에서 밀려나거나
-                넘치는 일이 없다. */}
+                나눈 "타임라인" 형태로 바꿨다. 세로 패딩(py-2.5/py-3)과 바깥 gap을 기존
+                박스형보다 살짝 더 줄여서, 세로 폭이 좁은 중간 크기 화면(예: 768x1024
+                세로 태블릿)에서도 이 캐러셀 영역 안에서 스크롤 없이 전부 들어간다(실측
+                확인됨). 각 줄은 intro-step-in 애니메이션(globals.css)으로 살짝 아래에서
+                위로 올라오며 순서대로(180ms씩 지연) 나타난다 - 레이아웃 공간은 처음부터
+                차지하고 있고 opacity/transform만 바뀌므로 페이지 안에서 밀려나거나 넘치는
+                일이 없다. */}
             <div className="flex flex-col">
               {INTRO_STEPS.map(({ no, title, desc }, i) => (
                 <div
                   key={no}
-                  className={`intro-step-in flex items-center gap-4 py-3 sm:py-4 ${
+                  className={`intro-step-in flex items-center gap-4 py-2.5 sm:py-3 ${
                     i < INTRO_STEPS.length - 1 ? "border-b border-white/15" : ""
                   }`}
                   style={{ animationDelay: `${i * 180}ms` }}
