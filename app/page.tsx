@@ -320,8 +320,13 @@ export default function Home() {
         </section>
 
         <section
-          className="relative w-full overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5 lg:h-full"
-          style={{ aspectRatio: `${PUZZLE_CONFIG.columns} / ${PUZZLE_CONFIG.rows}` }}
+          // 퍼즐판이 세로로 긴 배열(6x8)로 바뀌면서, 폭 기준 비율(aspectRatio)에 그대로
+          // 맡기면 모바일/태블릿의 세로 쌓임 레이아웃에서 퍼즐판 높이가 지나치게 커져
+          // 위의 입력 패널을 밀어내거나 화면 아래로 잘릴 수 있다. 그래서 lg: 미만에서는
+          // 뷰포트 높이에 비례한 고정 높이(h-[38vh])로 안전하게 제한하고, 그 안에서
+          // PuzzleBoard 내부의 contain 계산이 비율을 유지한 채 꽉 차게(letterbox만 생기고
+          // 잘리지 않게) 그린다. lg: 이상에서는 기존처럼 영역 전체 높이를 그대로 쓴다.
+          className="relative h-[38vh] min-h-[220px] w-full overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-900/5 lg:h-full"
         >
           <PuzzleBoard
             containerRef={boardContainerRef}
