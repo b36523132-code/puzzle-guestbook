@@ -200,7 +200,16 @@ export default function PuzzleBoard({
   }
 
   return (
-    <div ref={wrapperRef} className="flex h-full w-full items-center justify-center overflow-hidden">
+    <div
+      ref={wrapperRef}
+      // 가로로 넓은 배열(8x6)은 "폭 기준"으로 꽉 차게 맞춰지고 남는 여백은 항상 위/아래로만
+      // 생긴다. items-center(세로 가운데 정렬)를 쓰면 그 여백이 보드 위/아래로 반반 나뉘어
+      // 보드가 빈 공간 한가운데 "둥둥 떠 있는" 것처럼 보인다. items-start로 위쪽에 붙이면
+      // 보드가 바로 위의 "퍼즐판 현황" 바로 이어 붙어 보이고, 남는 여백은 전부 아래쪽에만
+      // 모여 훨씬 자연스럽다. (가로 중앙 정렬은 폭 기준으로 이미 꽉 차 있어 justify-center는
+      // 다른 배열/화면 조합에서 옆으로 남는 여백이 생길 때만 의미가 있으므로 그대로 둔다.)
+      className="flex h-full w-full items-start justify-center overflow-hidden"
+    >
       <div
         ref={setBoardRef}
         // wrapper 가 flex 컨테이너라서, flex 의 기본 shrink 동작이 cover 계산으로 일부러
