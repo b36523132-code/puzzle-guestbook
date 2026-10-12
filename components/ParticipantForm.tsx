@@ -332,12 +332,8 @@ function IntroScreen({
       >
         {page === 0 && (
           <div className="flex flex-1 flex-col items-center justify-start gap-4 text-center sm:justify-center sm:gap-6">
-            {/* 맞춰진/전체 조각 수는 "남은 조각" 카드처럼 크게 보여줄 필요 없이, 그 위에
-                작고 간단한 한 줄("맞춰진 조각/전체 조각")로만 덧붙인다. "남은 조각" 카드 자체는
-                그대로 유지한다. */}
-            <p className="text-xs font-medium text-white/60 sm:text-sm">
-              맞춰진 조각 {filledCount}개 / 전체 조각 {totalPieces}개
-            </p>
+            {/* 맞춰진/전체 조각 수는 이제 퍼즐판 쪽 "퍼즐판 현황" 바에서 보여주므로, 여기서는
+                중복해서 보여주지 않는다. "남은 조각" 카드만 유지한다. */}
             <div className="w-full rounded-2xl border border-white/25 px-4 py-6 sm:py-8">
               <p className="text-lg font-semibold text-white/70 sm:text-xl">남은 조각</p>
               <p className="mt-2 flex items-baseline justify-center gap-2 font-extrabold text-amber-200">
@@ -558,12 +554,14 @@ function StepReview({
     // sm~lg 사이의 태블릿 폭까지)은 전부 퍼즐판과 세로로 쌓이는 레이아웃이라 세로 공간이
     // 빠듯하므로, 글자/여백을 키우는 기준을 sm 대신 lg 로 맞춰서 그 구간에서 글자가
     // 영역을 넘쳐 잘리는 일이 없게 한다.
-    // justify-center는 넘칠 때 위/아래 양쪽을 동시에 잘라서(특히 1024x768처럼 넓지만
-    // 낮은 화면에서) 제목 윗부분이 통째로 안 보이는 문제를 일으키므로, 모든 구간에서
-    // justify-start를 유지해 넘치는 경우에도 항상 아래쪽만 잘리게 한다.
-    <div className="flex h-full min-h-0 flex-col items-center justify-start gap-0.5 overflow-hidden text-center lg:gap-2">
+    // lg 이상에서는 실측 결과 세로 공간이 넉넉히 남으므로(1024x768 기준으로도 여유가 있음),
+    // justify-between 으로 세 블록(제목/미리보기/안내문구) 사이 간격을 남는 공간만큼
+    // 자동으로 벌려 화면을 꽉 채운다 - 글자 크기를 고정값으로 무리하게 키우는 대신 "남는
+    // 공간을 간격으로 분배"하는 방식이라, 화면 크기가 달라져도 넘치거나 잘릴 위험이 없다.
+    // (justify-between은 기존 요소 높이의 합이 변하지 않는 한 넘침을 유발하지 않는다.)
+    <div className="flex h-full min-h-0 flex-col items-center justify-start gap-0.5 overflow-hidden text-center lg:justify-between lg:gap-2">
       <div>
-        <h2 className="text-sm font-extrabold leading-tight text-slate-900 lg:text-lg">
+        <h2 className="text-sm font-extrabold leading-tight text-slate-900 lg:text-xl">
           <span className="lg:hidden">조각이 완성됐어요!</span>
           <span className="hidden lg:inline">
             모든 단계를 완료하고
@@ -571,7 +569,7 @@ function StepReview({
             나만의 조각을 완성했어요!
           </span>
         </h2>
-        <p className="mt-1 hidden text-sm text-slate-500 lg:block lg:text-xs">
+        <p className="mt-1 hidden text-sm text-slate-500 lg:block lg:text-sm">
           당신이 완성한 조각을 확인해 보세요.
         </p>
       </div>
@@ -582,14 +580,15 @@ function StepReview({
         message={message}
         colorVariant={colorVariant}
         emojis={emojis}
-        className="max-w-[64px] lg:max-w-[100px]"
+        className="max-w-[64px] lg:max-w-[140px]"
       />
 
-      {/* 안내 문장은 요청대로 빼지 않고 lg(1024px) 이상에서는 항상 보여주되, 1024x768처럼
-          높이가 낮은 화면에서도 전체 내용이 넘치지 않도록 글자 크기와 여백을 작게 줄였다. */}
-      <div className="hidden w-full rounded-2xl bg-violet-50 px-3 py-1.5 text-left lg:block">
-        <p className="text-xs font-extrabold text-violet-700">작은 실천이 모여 깨끗한 광안리로!</p>
-        <p className="mt-0.5 text-[11px] leading-snug text-slate-600">
+      {/* 안내 문장은 빼지 않고 lg(1024px) 이상에서는 항상 보여준다. 실측 결과 남는 세로
+          공간이 충분해, 1024x768처럼 낮은 화면에서도 글자를 키운 채로 전체 내용이 넘치지
+          않고 들어간다. */}
+      <div className="hidden w-full rounded-2xl bg-violet-50 px-4 py-2.5 text-left lg:block">
+        <p className="text-sm font-extrabold text-violet-700">작은 실천이 모여 깨끗한 광안리로!</p>
+        <p className="mt-0.5 text-xs leading-snug text-slate-600">
           해변의 쓰레기 하나를 줍는 작은 실천처럼, 한 사람의 봉사가 다음 사람에게 이어질 때 더 큰 변화를 만들 수 있어요.
         </p>
       </div>
